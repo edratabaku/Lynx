@@ -1,0 +1,97 @@
+﻿        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Roboto";
+            font-size: 14px;
+            background-size: 200% 100% !important;
+            animation: move 10s ease infinite;
+            transform: translate3d(0, 0, 0);
+            background: linear-gradient(45deg, #333333 10%, #000000 90%);
+            height: 100vh;
+        }
+
+        .user {
+            width: 90%;
+            max-width: 390px;
+            margin: 10vh auto;
+        }
+        .options{
+            justify-content:center;
+            color:white;
+        }
+        .user__header {
+            text-align: center;
+        }
+
+        .text__login {
+            color: #FFD700;
+            text-align: center;
+        }
+        .help-block{
+            background-color:white;
+            min-width:100%;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            display: block;
+            overflow: hidden;
+            border:none;
+            font-size:14px;
+            font-family: "Roboto";
+        }
+
+        .user__title {
+            font-size: 14px;
+            margin-bottom: -10px;
+            font-weight: 500;
+            color: #FFD700;
+        }
+
+        .form {
+            margin-top: 40px;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .form__input {
+            display: block;
+            width: 100%;
+            padding: 20px;
+            font-family: "Roboto";
+            border: 0;
+            outline: 0;
+        }
+
+            .form__input:focus {
+                background: #f7f7f7;
+            }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 20px;
+            font-family: "Roboto";
+            outline: 0;
+            border: 0;
+            color: black;
+            background: #FFD700;
+        }
+
+            .btn:hover {
+                background: #D1B000;
+            }
+
+        @keyframes arrive {
+            0% {
+                opacity: 0;
+                transform: translate3d(0, 50px, 0);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translate3d(0, 0, 0);
+            }
+        }
