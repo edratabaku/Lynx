@@ -3,8 +3,26 @@ include("layout.php");
 session_start();
 // Nese perdoruesi ka dhene kredencialet drejtoje te home
 if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] == true){
-    header("location: index.php");
-    exit;
+    if(isset($_SESSION["Role"]) && $_SESSION["Role"]=="User"){
+        header("location: index.php");
+        exit;
+    }
+    else if(isset($_SESSION["Role"]) && $_SESSION["Role"]=="Driver"){
+        header("location: driverIndex.php");
+        exit;
+    }
+    else if(isset($_SESSION["Role"]) && $_SESSION["Role"]=="Supervisor"){
+        header("location: supervisorIndex.php");
+        exit;
+    }
+    else if(isset($_SESSION["Role"]) && $_SESSION["Role"]=="Manager"){
+        header("location: managerIndex.php");
+        exit;
+    }
+    else if(isset($_SESSION["Role"]) && $_SESSION["Role"]=="Administrator"){
+        header("location: adminIndex.php");
+        exit;
+    }
 }
 require_once "configuration.php";
 $username = $password = "";
@@ -35,13 +53,46 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                         if(password_verify($password, $hash_password)){
                             session_start();
                             $_SESSION["loggedin"] = true;
-                            $_SESSION["Id"] = $personId;
+                            $_SESSION["Id"] = $id;
                             $_SESSION["Email"] = $email;
                             $_SESSION["Username"] = $username;
                             $_SESSION["RoleId"] = $roleId;
                             $_SESSION["FirstName"] = $firstName;
                             $_SESSION["LastName"] = $lastName;
-                            header("location: index.php");
+                            $otherSql = "SELECT * FROM Roles WHERE Id=?";
+                            if($stmt2 = mysqli_prepare($mysqli,$otherSql)){
+                                $param_id = $roleId;
+                                mysqli_stmt_bind_param($stmt2,"s",$param_id);
+                                if(mysqli_stmt_execute($stmt2)){
+                                    mysqli_stmt_store_result($stmt2);
+                                    if(mysqli_stmt_num_rows($stmt2)==1){
+                                        mysqli_stmt_bind_result($stmt2,$id,$name);
+                                        if(mysqli_stmt_fetch($stmt2)){
+                                            if($name == 'Administrator'){
+                                                $_SESSION["Role"] = "Administrator";
+                                                header("location: adminIndex.php");
+                                            }
+                                            else if($name == "Manager"){
+                                                $_SESSION["Role"] = "Manager";
+                                                header("location: managerIndex.php");
+                                            }
+                                            else if($name == "Supervisor"){
+                                                $_SESSION["Role"] = "Supervisor";
+                                                header("location: supervisorIndex.php");
+                                            }
+                                            else if($name == "Driver"){
+                                                $_SESSION["Role"] = "Driver";
+                                                header("location: driverIndex.php");
+                                            }
+                                            else{
+                                                $_SESSION["Role"] = "User";
+                                                header("location: userLayout.php?page=index");
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
                         }
                         else{ $password_error = "Password is incorrect.";}
                     }
@@ -49,6 +100,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             } else{ echo "Error. Please try again.";}
             // Close statement
             mysqli_stmt_close($stmt);
+            mysqli_stmt_close($stmt2);
         }
     }
     // Close connection
@@ -69,6 +121,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     </style>
 </head>
 <body>
+    <section class="back"></section>
     <div class="user">
         <header class="user__header">
             <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/3219/logo.svg" alt="" />

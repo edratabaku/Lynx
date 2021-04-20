@@ -23,20 +23,41 @@
     <Compile Include="Administration\adminConfig.php" />
     <Compile Include="Administration\adminlayout.php" />
     <Compile Include="Administration\roles.php" />
+    <Compile Include="Comment.php" />
+    <Compile Include="Complaint.php" />
     <Compile Include="configuration.php" />
+    <Compile Include="Driver.php" />
+    <Compile Include="userProfile.php" />
+    <Compile Include="userLayout.php" />
+    <Compile Include="driverSpecifications.php" />
     <Compile Include="index.php" />
+    <Compile Include="layout.php" />
     <Compile Include="login.php" />
     <Compile Include="logout.php" />
     <Compile Include="register.php" />
+    <Compile Include="filterDrivers.php" />
     <Compile Include="Views\layout.php" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="CSS\" />
     <Folder Include="Administration\" />
+    <Folder Include="Fonts\" />
+    <Folder Include="Images\" />
     <Folder Include="Views\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="CSS\admin.css" />
     <Content Include="CSS\authentication.css" />
+    <Content Include="Fonts\quicksand.bold-regular.otf" />
+    <Content Include="Fonts\quicksand.book-regular.otf" />
+    <Content Include="Fonts\quicksand.light-regular.otf" />
+    <Content Include="Images\wp10.jpg" />
+    <Content Include="Images\wp2.png" />
+    <Content Include="Images\wp3.jpg" />
+    <Content Include="Images\wp4.jpg" />
+    <Content Include="Images\wp5.jpg" />
+    <Content Include="Images\wp6.jpg" />
+    <Content Include="Images\wp7.jpg" />
+    <Content Include="Images\wp9.jpg" />
   </ItemGroup>
 </Project>

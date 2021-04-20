@@ -42,15 +42,15 @@
         }
         switch ($page) {
 
-            case 'roles':
+            case "roles":
                 include('roles.php');
                 break;
 
-            case 'about':
+            case "about":
                 include('about.php');
                 break;
 
-            case 'contact':
+            case "contact":
                 include('contact.php');
                 break;
         }
