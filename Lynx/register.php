@@ -1,4 +1,5 @@
 <?php
+//include layout file
 include("layout.php");
 //add the configuration file
 require_once "configuration.php";
@@ -12,17 +13,20 @@ $lastName="";
 $phoneNumber="";
 $dateOfBirth = "";
 $gender = "";
+//initializing error validation messages
 $email_error=$password_error=$username_error=$confirmPassword_error=$firstName_error=$lastName_error=$phoneNumber_error=$dateOfBirth_error=$gender_error="";
+//check if the request is a post request
 if($_SERVER["REQUEST_METHOD"] == "POST"){
-    //if there is no email address specified
+    //if there is no email address or phone number specified
     if((empty(trim($_POST["email"])))&&(empty(trim($_POST["phoneNumber"])))){
         $email_error="You must enter an email or phone number.";
     }
     else{
-        //prepare statement
+        //prepare statement to find if user with the same email/phone number exists
         $sql = "SELECT Id FROM users WHERE email = ? or phonenumber = ?";
-
+        
         if($stmt = mysqli_prepare($mysqli,$sql)){
+            //bind parameters to statement
             mysqli_stmt_bind_param($stmt,"ss",$param_email,$param_number);
             $param_email = trim($_POST["email"]);
             $param_number = trim($_POST["phoneNumber"]);
@@ -42,22 +46,28 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             else{
                 echo "An error occurred. Please try again later.";
             }
-            mysqli_stmt_close($stmt);
+
         }
+        //close statement
+        mysqli_stmt_close($stmt);
     }
+    //password must not be empty
     if(empty(trim($_POST["password"]))){
         $password_error = "You must provide a password";
     }
+    //password length must be 8 characters or more
     else if(strlen(trim($_POST["password"]))<8){
         $password_error = "Password must have a minimum length of 8.";
     }
     else{
         $password = trim($_POST["password"]);
     }
-
+    //check for username is empty
     if(empty(trim($_POST["username"]))){
+        //if phone number is empty, use email as username
         if(empty(trim($_POST["phoneNumber"])))
             $username = $email;
+        //else use phone number as username
         else $username = $phoneNumber;
     }
     else{
@@ -82,6 +92,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     if(empty(trim($_POST["confirmPassword"]))){
         $confirmPassword_error = "Please confirm your password";
     }
+    //if password and its confirmation do not match
     else if(strcmp($test_pass,$test_confPass) != 0){
         $confirmPassword_error = "Your password and confirm password do not match.";
     }
@@ -96,8 +107,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
         $birthDate = explode("-", $dateOfBirth);
         //get age from date or birthdate
         $age = (date("md", date("U", mktime(0, 0, 0, $birthDate[0], $birthDate[1], $birthDate[2]))) > date("md")
-          ? ((date("Y") - $birthDate[0]) - 1)
-          : (date("Y") - $birthDate[0]));
+          ? ((date("Y") - $birthDate[0]) - 1) : (date("Y") - $birthDate[0]));
         if($age<13 && $_POST["isDriver"]==false){
             $dateOfBirth_error = "For safety reasons, you must be 13 or older to use our services.";
         }
@@ -117,79 +127,97 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     else{
         $gender_error = "Please specify your gender";
     }
+    //check if there are any errors
     if(empty($email_error) && empty($password_error) && empty($confirmPassword_error) && empty($username_error)&&empty($phoneNumber_error)&&empty($dateOfBirth_error)&&empty($gender_error)){
+        //prepare statement
         $sql = "INSERT INTO users(Id,Email,PhoneNumber,Password,ConfirmPassword,Username,FirstName,LastName,IsActive,RoleId,DateOfBirth,Gender) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
         if($stmt = mysqli_prepare($mysqli, $sql)){
             $param_email = $email;
             $param_number = $phoneNumber;
+            //password as hash
             $param_password = hash('sha512', $password);
             $param_password = password_hash($param_password, PASSWORD_DEFAULT);
             $param_confirmPassword = hash('sha512', $password);
-            $param_confirmPassword = password_hash($param_confirmPassword, PASSWORD_DEFAULT);
+             $param_confirmPassword = password_hash($param_confirmPassword, PASSWORD_DEFAULT);
             $param_username = $username;
             $param_firstName = $firstName;
             $param_lastName= $lastName;
             $param_isActive = true;
-            $otherSql = "SELECT * FROM Roles WHERE Name=?";
-            if($stmt2 = mysqli_prepare($mysqli,$otherSql)){
-                $param_name = "User";
-                mysqli_stmt_bind_param($stmt2,"s",$param_name);
-                if(mysqli_stmt_execute($stmt2)){
-                    mysqli_stmt_store_result($stmt2);
-                    if(mysqli_stmt_num_rows($stmt2)==1){
-                        mysqli_stmt_bind_result($stmt2,$id,$name);
-                        if(mysqli_stmt_fetch($stmt2)){
-                            $param_roleId =  $id;
-                        }
-                    }
+            //if user wants to register as driver
+            if(isset($_POST["isDriver"]) && $_POST["isDriver"]==true){
+                $param_roleName = "Driver";
+                //get the ide of the driver role
+                $result = mysqli_query($mysqli,"SELECT Id, Name FROM Roles WHERE Name='$param_roleName'");
+                if(mysqli_num_rows($result)==1){
+                    $row = mysqli_fetch_array($result,MYSQLI_ASSOC);
+                    $param_roleId = $row["Id"];
                 }
             }
+            else{
+                $param_roleName = "User";
+                $result = mysqli_query($mysqli,"SELECT Id, Name FROM Roles WHERE Name='$param_roleName'");
+                if(mysqli_num_rows($result)==1){
+                    $row = mysqli_fetch_array($result,MYSQLI_ASSOC);
+                    $param_roleId = $row["Id"];
+                }
+            }
+            //close statement
             mysqli_stmt_close($stmt2);
+            //generate unique id
             $param_id = uniqid();
             $param_dateOfBirth = $dateOfBirth;
             $param_gender = $gender;
+            //bind parameters to statement
             mysqli_stmt_bind_param($stmt,"ssssssssssss", $param_id,$param_email,$param_number,$param_password,$param_confirmPassword,$param_username,$param_firstName,$param_lastName,$param_isActive,$param_roleId,$param_dateOfBirth,$param_gender);
             if(mysqli_stmt_execute($stmt)){
+                //start a new session
                 session_start();
                 $_SESSION["loggedin"] = true;
-                $_SESSION["Id"] = $personId;
+                $_SESSION["Id"] = $param_id;
                 $_SESSION["Email"] = $email;
                 $_SESSION["Username"] = $username;
                 $_SESSION["PhoneNumber"] = $phoneNumber;
-                $_SESSION["Role"] = "User";
                 $_SESSION["FirstName"] = $firstName;
                 $_SESSION["LastName"] = $lastName;
                 if(isset($_POST["isDriver"]) && $_POST["isDriver"]==true){
-                    $otherSql = "SELECT * FROM Roles WHERE Name=?";
-                    if($stmt2 = mysqli_prepare($mysqli,$otherSql)){
-                        $param_name = "Driver";
-                        mysqli_stmt_bind_param($stmt2,"s",$param_name);
-                        if(mysqli_stmt_execute($stmt2)){
-                            mysqli_stmt_store_result($stmt2);
-                            if(mysqli_stmt_num_rows($stmt2)==1){
-                                mysqli_stmt_bind_result($stmt2,$id,$name);
-                                if(mysqli_stmt_fetch($stmt2)){
-                                    $param_roleId =  $id;
-                                }
-                            }
-                        }
-                    }
-                    mysqli_stmt_close($stmt2);
-                    $otherSql = "UPDATE Users SET RoleId = ? WHERE Id = ?";
-                    if($stmt2 = mysqli_prepare($mysqli,$otherSql)){
-                        $param_name = "Driver";
-                        mysqli_stmt_bind_param($stmt2,"ss",$param_roleId,$param_id);
-                         if(mysqli_stmt_execute($stmt2)){
-                             $_SESSION["Role"] = "Driver";
-                             header("location:driverSpecifications.php");
-                         }
-                         else{
-                             echo "Ndodhi nje gabim. Provoni perseri.";
-                         }
-                    }
-                    mysqli_stmt_close($stmt2);
+                    $_SESSION["Role"] = "Driver";
+                    header("location:driverSpecifications.php");
                 }
-                else header("location: userLayout.php?page=index");
+                else{
+                    $_SESSION["Role"] = "User";
+                    header("location: userLayout.php?page=index");
+                }
+                //if(isset($_POST["isDriver"]) && $_POST["isDriver"]==true){
+                //    $otherSql = "SELECT * FROM Roles WHERE Name=?";
+                //    if($stmt2 = mysqli_prepare($mysqli,$otherSql)){
+                //        $param_name = "Driver";
+                //        mysqli_stmt_bind_param($stmt2,"s",$param_name);
+                //        if(mysqli_stmt_execute($stmt2)){
+                //            mysqli_stmt_store_result($stmt2);
+                //            if(mysqli_stmt_num_rows($stmt2)==1){
+                //                mysqli_stmt_bind_result($stmt2,$id,$name);
+                //                if(mysqli_stmt_fetch($stmt2)){
+                //                    $param_roleId =  $id;
+                //                }
+                //            }
+                //        }
+                //    }
+                //    mysqli_stmt_close($stmt2);
+                //    $otherSql = "UPDATE Users SET RoleId = ? WHERE Id = ?";
+                //    if($stmt2 = mysqli_prepare($mysqli,$otherSql)){
+                //        $param_name = "Driver";
+                //        mysqli_stmt_bind_param($stmt2,"ss",$param_roleId,$param_id);
+                //        if(mysqli_stmt_execute($stmt2)){
+                //            $_SESSION["Role"] = "Driver";
+                //            header("location:driverSpecifications.php");
+                //        }
+                //        else{
+                //            echo "Ndodhi nje gabim. Provoni perseri.";
+                //        }
+                //    }
+                ////    mysqli_stmt_close($stmt2);
+                ////}
+                //header("location: userLayout.php?page=index");
             }
             else{
                 echo "Ndodhi nje gabim. Provoni perseri.";
@@ -212,88 +240,126 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous" />
     <style type="text/css">
 <?php include 'CSS/authentication.css'; ?>
+<?php include 'CSS/register.css'; ?>
     </style>
 </head>
 <body>
+    <section class="back"></section>
     <div class="user">
         <header class="user__header">
             <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/3219/logo.svg" alt="" />
             <h1 class="user__title">Sign up to access the app.</h1>
         </header>
-        <form class="form" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
-            <div class="row no-gutters">
-                <div class="col-md-6">
-                    <div class="form__group">
-                        <input type="text" placeholder="First Name" class="form__input" name="firstName" id="firstName" value="<?php echo isset($_POST['firstName']) ? htmlspecialchars($_POST['firstName'], ENT_QUOTES) : ''; ?>" />
-                        <span class="help-block text-danger pl-2"><?php echo $firstName_error ?>
-                        </span>
+        <div class="row">
+            <form class="form" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="row no-gutters">
+                            <div class="col-md-6">
+                                <div class="form__group">
+                                    <input type="text" placeholder="First Name" class="form__input" name="firstName" id="firstName" value="<?php echo isset($_POST['firstName']) ? htmlspecialchars($_POST['firstName'], ENT_QUOTES) : ''; ?>" />
+                                    <span class="help-block text-danger pl-2">
+                                        <?php echo $firstName_error ?>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form__group">
+                                    <input type="text" placeholder="Last Name" class="form__input" name="lastName" id="lastName" value="<?php echo isset($_POST['firstName']) ? htmlspecialchars($_POST['lastName'], ENT_QUOTES) : ''; ?>" />
+                                    <span class="help-block text-danger pl-2">
+                                        <?php echo $lastName_error ?>
+                                    </span>
+                                </div>
+                            </div>
+                        </div></div>
+                        <div class="col-md-6">
+                        <div class="form__group" <?php echo(!empty($username_error))? 'has-error' : ''?>>
+                            <input type="text" placeholder="Username" class="form__input" name="username" id="username" value="<?php echo isset($_POST['username']) ? htmlspecialchars($_POST['username'], ENT_QUOTES) : ''; ?>" />
+                            <span class="help-block text-danger pl-2">
+                                <?php echo $username_error?>
+                            </span>
+                        </div>
                     </div>
                 </div>
-                <div class="col-md-6">
-                    <div class="form__group">
-                        <input type="text" placeholder="Last Name" class="form__input" name="lastName" id="lastName" value="<?php echo isset($_POST['firstName']) ? htmlspecialchars($_POST['lastName'], ENT_QUOTES) : ''; ?>" />
-                        <span class="help-block text-danger pl-2"><?php echo $lastName_error ?>
-                        </span>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form__group" <?php echo(!empty($email_error))? 'has-error' : '' ?>>
+                            <input type="email" placeholder="Email" class="form__input" name="email" id="email" value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email'], ENT_QUOTES) : ''; ?>" />
+                            <span class="help-block text-danger pl-2">
+                                <?php echo $email_error ?>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form__group" <?php echo(!empty($phoneNumber_error))? 'has-error' : '' ?>>
+                            <input type="text" placeholder="Phone number" class="form__input" name="phoneNumber" id="phoneNumber" value="<?php echo isset($_POST['phoneNumber']) ? htmlspecialchars($_POST['phoneNumber'], ENT_QUOTES) : ''; ?>" />
+                            <span class="help-block text-danger pl-2">
+                                <?php echo $phoneNumber_error ?>
+                            </span>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form__group" <?php echo(!empty($password_error))? 'has-error': ''?>>
+                            <input type="password" placeholder="Password" class="form__input" name="password" id="password" />
+                            <span class="help-block text-danger pl-2">
+                                <?php echo $password_error ?>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form__group" <?php echo(!empty($confirmPassword_error))? 'has-error': ''?>>
+                            <input type="password" placeholder="Confirm Password" class="form__input" name="confirmPassword" id="confirmPassword" />
+                            <span class="help-block text-danger pl-2">
+                                <?php echo $confirmPassword_error ?>
+                            </span>
+                        </div>
                     </div>
                 </div>
-            </div>
+                <div class="row">
+                    <div class="col-md-3"></div>
+                    <div class="col-md-6">
+                        <div class="form__group" <?php echo(!empty($dateOfBirth_error))? 'has-error' : '' ?>>
+                            <input type="date" placeholder="Date of birth" class="form__input" name="dateOfBirth" id="dateOfBirth" value="<?php echo isset($_POST['dateOfBirth']) ? htmlspecialchars($_POST['dateOfBirth'], ENT_QUOTES) : ''; ?>" />
+                            <span class="help-block text-danger pl-2">
+                                <?php echo $dateOfBirth_error ?>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-md-3"></div>
+                    <div class="row">
+                        <div class="col-md-1"></div>
+                        <div class="col-md-10">
+                            <div class="form__group help-block">
+                                <label style="font-size:14px;color:#808080;" class="check mr-4 ml-3">Gender:</label>
+                                <input type="radio" name="gender" value="m" id="genderM" class="ml-3 mr-2" style="font-size:larger;" checked />
+                                <label class="check" for="genderM" style="font-size:14px;color:#808080;">Male</label>
+                                <input type="radio" name="gender" value="f" id="genderF" class="ml-3 mr-2" style="font-size:larger;" />
+                                <label class="check" for="genderF" style="font-size:14px;color:#808080;">Female</label>
+                                <input type="radio" name="gender" value="o" id="genderO" class="ml-3 mr-2" style="font-size:larger;" />
+                                <label class="check" for="genderO" style="font-size:14px;color:#808080;">Other</label>
+                            </div>
+                        </div>
+                        <div class="col-md-1"></div>
+                    </div>
+                </div>
+                <div class="row">
 
-            <div class="form__group" <?php echo(!empty($username_error))? 'has-error' : ''?>>
-                <input type="text" placeholder="Username" class="form__input" name="username" id="username" value="<?php echo isset($_POST['username']) ? htmlspecialchars($_POST['username'], ENT_QUOTES) : ''; ?>" />
-                <span class="help-block text-danger pl-2"><?php echo $username_error?>
-                </span>
-            </div>
+                    <div class="form__group help-block">
+                        <input type="checkbox" name="isDriver" value="true" id="isDriver" class="ml-3 mr-2" style="font-size:larger;" />
+                        <label for="isDriver" style="font-size:14px;color:#808080;">Register as Driver</label>
+                    </div>
+                    <button class="btn" type="submit">Register</button>
+                    <div class="row text__login justify-content-center mt-3">
+                        <a href="login.php" class="text__login">Already have an account? Log In</a>
+                    </div>
+                </div>
+            </form>
+        </div>
 
-            <div class="form__group" <?php echo(!empty($email_error))? 'has-error' : '' ?>>
-                <input type="email" placeholder="Email" class="form__input" name="email" id="email" value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email'], ENT_QUOTES) : ''; ?>" />
-                <span class="help-block text-danger pl-2"><?php echo $email_error ?>
-                </span>
-            </div>
-
-            <div class="form__group" <?php echo(!empty($phoneNumber_error))? 'has-error' : '' ?>>
-                <input type="text" placeholder="Phone number" class="form__input" name="phoneNumber" id="phoneNumber" value="<?php echo isset($_POST['phoneNumber']) ? htmlspecialchars($_POST['phoneNumber'], ENT_QUOTES) : ''; ?>" />
-                <span class="help-block text-danger pl-2"><?php echo $phoneNumber_error ?>
-                </span>
-            </div>
-
-            <div class="form__group" <?php echo(!empty($password_error))? 'has-error': ''?>>
-                <input type="password" placeholder="Password" class="form__input" name="password" id="password"/>
-                <span class="help-block text-danger pl-2"><?php echo $password_error ?>
-                </span>
-            </div>
-
-            <div class="form__group" <?php echo(!empty($confirmPassword_error))? 'has-error': ''?>>
-                <input type="password" placeholder="Confirm Password" class="form__input" name="confirmPassword" id="confirmPassword" />
-                <span class="help-block text-danger pl-2"><?php echo $confirmPassword_error ?>
-                </span>
-            </div>
-
-            <div class="form__group" <?php echo(!empty($dateOfBirth_error))? 'has-error' : '' ?>>
-                <input type="date" placeholder="Date of birth" class="form__input" name="dateOfBirth" id="dateOfBirth" value="<?php echo isset($_POST['dateOfBirth']) ? htmlspecialchars($_POST['dateOfBirth'], ENT_QUOTES) : ''; ?>" />
-                <span class="help-block text-danger pl-2">
-                    <?php echo $dateOfBirth_error ?>
-                </span>
-            </div>
-
-            <div class="form__group help-block">
-                <label style="font-size:14px;color:#808080;" class="mr-4 ml-3">Gender:</label>
-                <input type="radio" name="gender" value="m" id="genderM" class="ml-3 mr-2" style="font-size:larger;" checked/>
-                <label for="genderM" style="font-size:14px;color:#808080;">Male</label>
-                <input type="radio" name="gender" value="f" id="genderF" class="ml-3 mr-2" style="font-size:larger;" />
-                <label for="genderF" style="font-size:14px;color:#808080;">Female</label>
-                <input type="radio" name="gender" value="o" id="genderO" class="ml-3 mr-2" style="font-size:larger;" />
-                <label for="genderO" style="font-size:14px;color:#808080;">Other</label>
-            </div>
-
-            <div class="form__group help-block">
-                <input type="checkbox" name="isDriver" value="true" id="isDriver" class="ml-3 mr-2" style="font-size:larger;"/>
-                <label for="isDriver" style="font-size:14px;color:#808080;">Register as Driver</label>
-            </div>
-            <button class="btn" type="submit">Register</button>
-            <div class="row text__login justify-content-center mt-3">
-                <a href="login.php" class="text__login">Already have an account? Log In</a>
-            </div>
-        </form>
     </div>
 </body>
 </html>

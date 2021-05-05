@@ -1,9 +1,7 @@
 <?php
 session_start();
-if(isset($_SESSION["Role"]) && $_SESSION["Role"] == "User"){
-    require_once "configuration.php";
-    $Id = $_SESSION["Id"];
-}
+require_once "configuration.php";
+$Id = $_SESSION["Id"];
 ?>
 
 <html>
@@ -46,7 +44,11 @@ if(isset($_SESSION["Role"]) && $_SESSION["Role"] == "User"){
             color: white;
             font-weight: 600;
             box-shadow: 3px 0px 11px 2px #272727;
-        }
+            }
+
+            .card-box:hover {
+                box-shadow: 3px 0px 11px 2px #8a7129;
+            }
 
         .social-links li a {
             border-radius: 50%;
@@ -224,6 +226,11 @@ if(isset($_SESSION["Role"]) && $_SESSION["Role"] == "User"){
             margin: 0;
             padding: 0;
         }
+
+
+
+
+
     </style>
 
 </head>

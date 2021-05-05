@@ -27,6 +27,12 @@
     <Compile Include="Complaint.php" />
     <Compile Include="configuration.php" />
     <Compile Include="Driver.php" />
+    <Compile Include="driverIndex.php" />
+    <Compile Include="driverLayout.php" />
+    <Compile Include="editPassword.php" />
+    <Compile Include="editProfile.php" />
+    <Compile Include="filterRequests.php" />
+    <Compile Include="Request.php" />
     <Compile Include="userProfile.php" />
     <Compile Include="userLayout.php" />
     <Compile Include="driverSpecifications.php" />
@@ -47,6 +53,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="CSS\admin.css" />
+    <Content Include="CSS\register.css" />
     <Content Include="CSS\authentication.css" />
     <Content Include="Fonts\quicksand.bold-regular.otf" />
     <Content Include="Fonts\quicksand.book-regular.otf" />

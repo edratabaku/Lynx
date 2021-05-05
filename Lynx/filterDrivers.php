@@ -14,7 +14,7 @@ if($name == null){
                     PhoneNumber,
                     FirstName,
                     LastName,
-                    IsActive,
+                    d.IsActive,
                     d.IsBanned,
                     DateOfBirth,
                     Gender,
@@ -28,7 +28,7 @@ if($name == null){
                     IsApproved,
                     IsBusy FROM lynx.Drivers as d
               inner join Users as u on u.Id = d.userId
-              where d.IsBusy=0 and d.IsBanned=0 and d.IsApproved=1 and u.IsActive=1";
+              where d.IsBusy=0 and d.IsBanned=0 and d.IsApproved=1 and u.IsActive=1 and d.IsActive=1";
     if($stmt = mysqli_prepare($mysqli, $query)){
         if(mysqli_stmt_execute($stmt)){
              $result = mysqli_stmt_get_result($stmt);
@@ -120,6 +120,7 @@ if($name == null){
                  }
              }
         }}
+    mysqli_stmt_close($stmt);
 }
 else {
     $query = "
@@ -129,7 +130,7 @@ else {
                     PhoneNumber,
                     FirstName,
                     LastName,
-                    IsActive,
+                    d.IsActive,
                     d.IsBanned,
                     DateOfBirth,
                     Gender,
@@ -143,7 +144,7 @@ else {
                     IsApproved,
                     IsBusy FROM lynx.Drivers as d
               inner join Users as u on u.Id = d.userId
-              where d.IsBusy=0 and d.IsBanned=0 and d.IsApproved=1 and u.IsActive=1
+              where d.IsBusy=0 and d.IsBanned=0 and d.IsApproved=1 and d.IsActive=1 and u.IsActive=1
               and u.firstname like ? or u.lastname like ?";
     if($stmt = mysqli_prepare($mysqli, $query)){
         mysqli_stmt_bind_param($stmt,"ss", $param_name, $param_name);
@@ -239,6 +240,7 @@ else {
         }
 
     }
+    mysqli_stmt_close($stmt);
 }
     mysqli_stmt_close($mysqli);
  echo "<div class='content'>";
@@ -287,8 +289,21 @@ else if($counter%3==0){
                 </div>
             </div>
         </div>
-   </div>
+   </div> 
 </div>
+
+<div>
+
+
+
+
+
+
+
+</div>
+
+
+
 </div>
 </div>";
 if ($counter == count($drivers)-1 && $counter%3!=0){

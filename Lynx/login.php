@@ -1,4 +1,5 @@
 <?php
+
 include("layout.php");
 session_start();
 // Nese perdoruesi ka dhene kredencialet drejtoje te home
@@ -59,49 +60,42 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                             $_SESSION["RoleId"] = $roleId;
                             $_SESSION["FirstName"] = $firstName;
                             $_SESSION["LastName"] = $lastName;
-                            $otherSql = "SELECT * FROM Roles WHERE Id=?";
-                            if($stmt2 = mysqli_prepare($mysqli,$otherSql)){
-                                $param_id = $roleId;
-                                mysqli_stmt_bind_param($stmt2,"s",$param_id);
-                                if(mysqli_stmt_execute($stmt2)){
-                                    mysqli_stmt_store_result($stmt2);
-                                    if(mysqli_stmt_num_rows($stmt2)==1){
-                                        mysqli_stmt_bind_result($stmt2,$id,$name);
-                                        if(mysqli_stmt_fetch($stmt2)){
-                                            if($name == 'Administrator'){
-                                                $_SESSION["Role"] = "Administrator";
-                                                header("location: adminIndex.php");
-                                            }
-                                            else if($name == "Manager"){
-                                                $_SESSION["Role"] = "Manager";
-                                                header("location: managerIndex.php");
-                                            }
-                                            else if($name == "Supervisor"){
-                                                $_SESSION["Role"] = "Supervisor";
-                                                header("location: supervisorIndex.php");
-                                            }
-                                            else if($name == "Driver"){
-                                                $_SESSION["Role"] = "Driver";
-                                                header("location: driverIndex.php");
-                                            }
-                                            else{
-                                                $_SESSION["Role"] = "User";
-                                                header("location: userLayout.php?page=index");
-                                            }
-                                        }
-                                    }
+                            $param_roleId = $roleId;
+                            $result = mysqli_query($mysqli,"SELECT Id, Name FROM Roles WHERE Id='$param_roleId'");
+                            if(mysqli_num_rows($result)==1){
+                                $row = mysqli_fetch_array($result,MYSQLI_ASSOC);
+                                $roleName = $row["Name"];
+                                if($roleName == 'Administrator'){
+                                    $_SERVER["Role"] = "Administrator";
+                                    header("location: adminIndex.php");
+                                }
+                                else if ($roleName == 'Manager'){
+                                    $_SERVER["Role"] = "Manager";
+                                    header("location: managerIndex.php");
+                                }
+                                else if($roleName == 'Supervisor'){
+                                    $_SERVER["Role"] = "Supervisor";
+                                    header("location: supervisorIndex.php");
+                                }
+                                else if($roleName == "Driver"){
+                                    $_SERVER["Role"] = "Driver";
+                                    header("location: driverIndex.php");
+                                }
+                                else {
+                                    $_SERVER["Role"] = "User";
+                                    header("location: userLayout.php?page=index");
                                 }
                             }
-
                         }
                         else{ $password_error = "Password is incorrect.";}
                     }
                 } else{ $email_error = "No existing account.";}
             } else{ echo "Error. Please try again.";}
             // Close statement
-            mysqli_stmt_close($stmt);
+
             mysqli_stmt_close($stmt2);
         }
+        mysqli_stmt_close($stmt);
     }
     // Close connection
     mysqli_close($mysqli);

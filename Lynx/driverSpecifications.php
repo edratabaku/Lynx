@@ -1,5 +1,6 @@
 <?php
 include("layout.php");
+session_start();
 //add the configuration file
 require_once "configuration.php";
 //initializing variables
@@ -25,7 +26,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     else{
         $licenseDate = trim($_POST["licenseDate"]);
         $date = explode("-", $licenseDate);
-        if($date[0]>2010){
+        if($date[0]<2010){
             $licenseDate_error = "Your license has expired.";
         }
     }
@@ -36,7 +37,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
         $licenseExpireDate = trim($_POST["licenseExpireDate"]);
         if(!empty(trim($_POST["licenseDate"]))){
             $expDate = explode("-",$licenseExpireDate);
-            if($expDate[0]>=($date[0]+9)){
+            if($expDate[0]!=($date[0]+10)){
                 $licenseExpireDate_error = "Your license release and expiration date must be at least 10 years apart.";
             }
         }
@@ -54,19 +55,20 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
         $car = $_POST["car"];
     }
     if(empty($licenseId_error) && empty($licenseDate_error) && empty($licenseExpireDate_error) && empty($operatingArea_error)&&empty($car_error)){
-        $sql = "INSERT INTO Drivers(Id,UserId,LicenseId,LicenseDate,LicenseExpireDate,OperatingArea,Car,IsApproved,IsBusy,IsBanned) VALUES (?,?,?,?,?,?,?,?,?,?)";
+        $sql = "INSERT INTO Drivers(Id,UserId,LicenseId,LicenseDate,LicenseExpireDate,OperatingArea,Car,IsApproved,IsBusy,IsBanned, IsActive) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
         if($stmt = mysqli_prepare($mysqli, $sql)){
             $param_licenseId = $licenseId;
             $param_licenseDate = $licenseDate;
             $param_licenseExpireDate = $licenseExpireDate;
             $param_operatingArea = $operatingArea;
             $param_car = $car;
-            $param_isApproved = false;
-            $param_isBusy = false;
-            $param_isBanned = false;
+            $param_isApproved = 0;
+            $param_isBusy = 0;
+            $param_isBanned = 0;
+            $param_isActive=1;
             $param_id = uniqid();
-            $param_userId = $_SESSION["id"];
-            mysqli_stmt_bind_param($stmt,"ssssssssss", $param_id,$param_userId,$param_licenseId,$param_licenseDate,$param_licenseExpireDate,$param_operatingArea,$param_car,$param_isApproved,$param_isBusy,$param_isBanned);
+            $param_userId = $_SESSION["Id"];
+            mysqli_stmt_bind_param($stmt,"sssssssssss", $param_id,$param_userId,$param_licenseId,$param_licenseDate,$param_licenseExpireDate,$param_operatingArea,$param_car,$param_isApproved,$param_isBusy,$param_isBanned,$param_isActive);
             if(mysqli_stmt_execute($stmt)){
                 session_start();
                 $_SESSION["loggedin"] = true;
@@ -76,8 +78,9 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             else{
                 echo "Ndodhi nje gabim. Provoni perseri.";
             }
-            mysqli_stmt_close($stmt);
+
         }
+        mysqli_stmt_close($stmt);
     }
     mysqli_close($mysqli);
 

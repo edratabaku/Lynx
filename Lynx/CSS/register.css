@@ -1,0 +1,54 @@
+﻿@font-face {
+    font-family: 'qBold';
+    src: url('../Fonts/quicksand.bold-regular.otf') format('opentype');
+}
+
+@font-face {
+    font-family: 'qBook';
+    src: url('../Fonts/quicksand.book-regular.otf') format('opentype');
+}
+
+@font-face {
+    font-family: 'qLight';
+    src: url('../Fonts/quicksand.light-regular.otf') format('opentype');
+}
+
+* {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'qBook';
+            font-size: 14px;
+            background-size: 200% 100% !important;
+            animation: move 10s ease infinite;
+            transform: translate3d(0, 0, 0);
+            /*background: linear-gradient(45deg, #333333 10%, #000000 90%);*/
+            height: 100vh;
+        }
+
+        .back {
+            width: 100%;
+            height: 100vh;
+            background-image: url(Images/wp5.jpg);
+            background-position: center top;
+            background-size: cover;
+        }
+.user {
+    padding: 20px;
+}
+
+.form__group {
+    background: transparent;
+    color: white;
+}
+
+.check {
+    color: white !important;
+}
+
+
+
+
