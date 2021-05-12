@@ -162,7 +162,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                 }
             }
             //close statement
-            mysqli_stmt_close($stmt2);
+            //mysqli_stmt_close($stmt2);
             //generate unique id
             $param_id = uniqid();
             $param_dateOfBirth = $dateOfBirth;
@@ -220,7 +220,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                 //header("location: userLayout.php?page=index");
             }
             else{
-                echo "Ndodhi nje gabim. Provoni perseri.";
+                echo "An error occured. Please try again later.";
             }
             mysqli_stmt_close($stmt);
         }
@@ -265,7 +265,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                             </div>
                             <div class="col-md-6">
                                 <div class="form__group">
-                                    <input type="text" placeholder="Last Name" class="form__input" name="lastName" id="lastName" value="<?php echo isset($_POST['firstName']) ? htmlspecialchars($_POST['lastName'], ENT_QUOTES) : ''; ?>" />
+                                    <input type="text" placeholder="Last Name" class="form__input" name="lastName" id="lastName" value="<?php echo isset($_POST['lastName']) ? htmlspecialchars($_POST['lastName'], ENT_QUOTES) : ''; ?>" />
                                     <span class="help-block text-danger pl-2">
                                         <?php echo $lastName_error ?>
                                     </span>

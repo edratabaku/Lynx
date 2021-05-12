@@ -26,6 +26,7 @@
     <Compile Include="Comment.php" />
     <Compile Include="Complaint.php" />
     <Compile Include="configuration.php" />
+    <Compile Include="deleteAccount.php" />
     <Compile Include="Driver.php" />
     <Compile Include="driverIndex.php" />
     <Compile Include="driverLayout.php" />

@@ -76,7 +76,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                 header("location: driverIndex.php");
             }
             else{
-                echo "Ndodhi nje gabim. Provoni perseri.";
+                echo "An error occured. Please try again later.";
             }
 
         }

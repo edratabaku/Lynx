@@ -119,7 +119,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     <div class="user">
         <header class="user__header">
             <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/3219/logo.svg" alt="" />
-            <h1 class="user__title">Sign up to access the app.</h1>
+            <h1 class="user__title">Sign in to access the app.</h1>
         </header>
 
         <form class="form" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">

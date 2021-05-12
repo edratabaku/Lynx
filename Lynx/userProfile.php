@@ -286,8 +286,20 @@ if(isset($_GET["id"]) && !empty(trim($_GET["id"]))){
     </style>
     <script>
         function DeactivateAccount() {
+            debugger
             $("#myModal").modal('show');
-            //TO DO: AJAX that deactivates user
+        }
+        function ConfirmDeactivateAccount() {
+            debugger
+            var xmlhttp = new XMLHttpRequest();
+            xmlhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    window.location.href = "logout.php";
+                }
+            }
+            var userId = document.getElementById("hiddenId");
+            xmlhttp.open("POST", "deleteAccount.php?id=" + userId, true);
+            xmlhttp.send();
         }
     </script>
 </head>
@@ -341,10 +353,18 @@ if(isset($_GET["id"]) && !empty(trim($_GET["id"]))){
                 <label>Email:</label>
                 <?php echo $row["Email"]; ?>
             </div>
+        <!--<a href="#deleteEmployeeModal" class="delete" data-id="<?php echo $row["id"]; ?>" data-toggle="modal">
+            <i class="material-icons" data-toggle="tooltip"
+                82
+                title="Delete">
+                
+            </i>
+        </a>-->
             <?php echo '<a href="editProfile.php?id='.$Id.'" class="btn btn-info" style="font-size:16px;">Edit Profile</a>'; ?>
             <?php echo '<a href="editPassword.php?id='.$Id.'" class="btn btn-info" style="font-size:16px;">Change Password</a>'; ?>
-            <?php echo '<a href="deleteAccount.php?id='.$Id.'" class="btn btn-info" style="font-size:16px;">Delete Account</a>'; ?>
+            <?php echo '<a href="#deleteEmployeeModal" class="btn btn-info" data-toggle="modal" style="font-size:16px;" data-id="'.$Id.'">Delete Account</a>'; ?>
             <a href="home.php" class="btn btn-default" style="font-size:16px;">Return to main page</a>
+        <?php echo '<input type="hidden" value="'.$Id.'" id="hiddenId">';?>
 
        </div>
     <!--Modal-->
@@ -356,14 +376,37 @@ if(isset($_GET["id"]) && !empty(trim($_GET["id"]))){
                     <h3 class="modal-title">Confirm deactivation</h3>
                 </div>
                 <div class="modal-body">
-                    <h4>Are you sure you want to delete your account? This action is permanent and cannot be reverted.</h4>
+                    <h6>This action is permanent and can not be reverted.</h6>
                 </div>
                 <div class="modal-footer">
-                    <a href="#" class="btn btn-success" onclick="DeactivateAccount()">Confirm</a>
+                    <a href="#" class="btn btn-success" onclick="ConfirmDeactivateAccount()">Confirm</a>
                     <a href="#" class="btn btn-danger" data-dismiss="modal">Cancel</a>
                 </div>
             </div>
         </div>
     </div>
+    <!-- Delete modal-->
+    <div id="deleteEmployeeModal" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form>
+                    <div class="modal-header">
+                        <h4 class="modal-title">Deactivate account</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">x</button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="id_d" name="id" class="form-control" />
+                        <p>Are you sure your want to deactivate your account?</p>
+                        <p class="text-warning"><small>This action is permanent.</small></p>
+                    </div>
+                    <div class="modal-footer">
+                        <input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel" />
+                        <button type="button" class="btn btn-danger" id="delete">Delete</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>
