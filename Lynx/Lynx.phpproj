@@ -59,6 +59,13 @@
     <Content Include="Fonts\quicksand.bold-regular.otf" />
     <Content Include="Fonts\quicksand.book-regular.otf" />
     <Content Include="Fonts\quicksand.light-regular.otf" />
+    <Content Include="Images\avatar.png" />
+    <Content Include="Images\black-and-gold.jpg" />
+    <Content Include="Images\by1.jpg" />
+    <Content Include="Images\circle_PNG62.png" />
+    <Content Include="Images\oie_transparent %281%29.png" />
+    <Content Include="Images\oie_transparent.png" />
+    <Content Include="Images\wcgoldbg.png" />
     <Content Include="Images\wp10.jpg" />
     <Content Include="Images\wp2.png" />
     <Content Include="Images\wp3.jpg" />

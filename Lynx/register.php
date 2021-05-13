@@ -15,8 +15,10 @@ $dateOfBirth = "";
 $gender = "";
 //initializing error validation messages
 $email_error=$password_error=$username_error=$confirmPassword_error=$firstName_error=$lastName_error=$phoneNumber_error=$dateOfBirth_error=$gender_error="";
+$profileImageError="";
 //check if the request is a post request
 if($_SERVER["REQUEST_METHOD"] == "POST"){
+    
     //if there is no email address or phone number specified
     if((empty(trim($_POST["email"])))&&(empty(trim($_POST["phoneNumber"])))){
         $email_error="You must enter an email or phone number.";
@@ -138,7 +140,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             $param_password = hash('sha512', $password);
             $param_password = password_hash($param_password, PASSWORD_DEFAULT);
             $param_confirmPassword = hash('sha512', $password);
-             $param_confirmPassword = password_hash($param_confirmPassword, PASSWORD_DEFAULT);
+            $param_confirmPassword = password_hash($param_confirmPassword, PASSWORD_DEFAULT);
             $param_username = $username;
             $param_firstName = $firstName;
             $param_lastName= $lastName;
@@ -179,6 +181,35 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                 $_SESSION["PhoneNumber"] = $phoneNumber;
                 $_SESSION["FirstName"] = $firstName;
                 $_SESSION["LastName"] = $lastName;
+                if (isset($_FILES['profileImage'])) {
+                    // for the database
+                    $profileImageName = time() . '-' . $_FILES["profileImage"]["name"];
+                    // For image upload
+                    $target_dir = "images/";
+                    $target_file = $target_dir . basename($profileImageName);
+                    // VALIDATION
+                    // validate image size. Size is calculated in Bytes
+                    if($_FILES['profileImage']['size'] > 200000) {
+                        $profileImageError = "Image size should not be greated than 200Kb";
+                    }
+                    // check if file exists
+                    if(file_exists($target_file)) {
+                        $profileImageError = "File already exists";
+                    }
+                    // Upload image only if no errors
+                    if (empty($profileImageError)) {
+                        if(move_uploaded_file($_FILES["profileImage"]["tmp_name"], $target_file)) {
+                            $sql = "UPDATE users SET profileImage='$profileImageName' WHERE Id='$param_id'";
+                            if(mysqli_query($mysqli, $sql)){
+                                //file uploaded successfully
+                            } else {
+                                $profileImageError = "There was an error.";
+                            }
+                        } else {
+                            $profileImageError = "There was an error uploading image.";
+                        }
+                    }
+                }
                 if(isset($_POST["isDriver"]) && $_POST["isDriver"]==true){
                     $_SESSION["Role"] = "Driver";
                     header("location:driverSpecifications.php");
@@ -187,37 +218,6 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                     $_SESSION["Role"] = "User";
                     header("location: userLayout.php?page=index");
                 }
-                //if(isset($_POST["isDriver"]) && $_POST["isDriver"]==true){
-                //    $otherSql = "SELECT * FROM Roles WHERE Name=?";
-                //    if($stmt2 = mysqli_prepare($mysqli,$otherSql)){
-                //        $param_name = "Driver";
-                //        mysqli_stmt_bind_param($stmt2,"s",$param_name);
-                //        if(mysqli_stmt_execute($stmt2)){
-                //            mysqli_stmt_store_result($stmt2);
-                //            if(mysqli_stmt_num_rows($stmt2)==1){
-                //                mysqli_stmt_bind_result($stmt2,$id,$name);
-                //                if(mysqli_stmt_fetch($stmt2)){
-                //                    $param_roleId =  $id;
-                //                }
-                //            }
-                //        }
-                //    }
-                //    mysqli_stmt_close($stmt2);
-                //    $otherSql = "UPDATE Users SET RoleId = ? WHERE Id = ?";
-                //    if($stmt2 = mysqli_prepare($mysqli,$otherSql)){
-                //        $param_name = "Driver";
-                //        mysqli_stmt_bind_param($stmt2,"ss",$param_roleId,$param_id);
-                //        if(mysqli_stmt_execute($stmt2)){
-                //            $_SESSION["Role"] = "Driver";
-                //            header("location:driverSpecifications.php");
-                //        }
-                //        else{
-                //            echo "Ndodhi nje gabim. Provoni perseri.";
-                //        }
-                //    }
-                ////    mysqli_stmt_close($stmt2);
-                ////}
-                //header("location: userLayout.php?page=index");
             }
             else{
                 echo "An error occured. Please try again later.";
@@ -239,19 +239,73 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous" />
     <style type="text/css">
-<?php include 'CSS/authentication.css'; ?>
-<?php include 'CSS/register.css'; ?>
+<?php include 'CSS/authentication.css'; ?><?php include 'CSS/register.css'; ?>        
+        #profileDisplay {
+            display: block;
+            height: auto;
+            width: 16%;
+            margin: 0px auto;
+            border-radius: 50%;
+        }
+
+        .img-placeholder {
+            width: 18%;
+            color: white;
+            height: 81%;
+            background: black;
+            opacity: .7;
+            border-radius: 50%;
+            z-index: 2;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            display: none;
+        }
+
+            .img-placeholder h4 {
+                margin-top: 40%;
+                color: white;
+            }
+
+        .img-div:hover .img-placeholder {
+            display: block;
+            cursor: pointer;
+        }
     </style>
+    <script>
+        function triggerClick(e) {
+            document.querySelector('#profileImage').click();
+        }
+        function displayImage(e) {
+            if (e.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    document.querySelector('#profileDisplay').setAttribute('src', e.target.result);
+                }
+                reader.readAsDataURL(e.files[0]);
+            }
+        }
+    </script>
 </head>
 <body>
     <section class="back"></section>
     <div class="user">
-        <header class="user__header">
+        <!--<header class="user__header">
             <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/3219/logo.svg" alt="" />
             <h1 class="user__title">Sign up to access the app.</h1>
-        </header>
+        </header>-->
         <div class="row">
-            <form class="form" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
+            <form class="form" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post" enctype="multipart/form-data">
+            <div class="form-group text-center" style="position: relative;" >
+            <span class="img-div">
+              <div class="text-center img-placeholder"  onClick="triggerClick()">
+                <h4>Upload image</h4>
+              </div>
+              <img src="images/avatar.png" onClick="triggerClick()" id="profileDisplay">
+            </span>
+            <input type="file" name="profileImage" onChange="displayImage(this)" id="profileImage" class="form-control" style="display: none;">
+            <label>Profile Image</label>
+          </div>
                 <div class="row">
                     <div class="col-md-6">
                         <div class="row no-gutters">
@@ -330,30 +384,29 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                         </div>
                     </div>
                     <div class="col-md-3"></div>
+                </div>
                     <div class="row">
-                        <div class="col-md-1"></div>
-                        <div class="col-md-10">
+                        <div class="col-md-12">
                             <div class="form__group help-block">
-                                <label style="font-size:14px;color:#808080;" class="check mr-4 ml-3">Gender:</label>
+                                <label style="color:#808080;" class="check mr-4 ml-3">Gender:</label>
                                 <input type="radio" name="gender" value="m" id="genderM" class="ml-3 mr-2" style="font-size:larger;" checked />
-                                <label class="check" for="genderM" style="font-size:14px;color:#808080;">Male</label>
+                                <label class="check" for="genderM" style="color:#808080;">Male</label>
                                 <input type="radio" name="gender" value="f" id="genderF" class="ml-3 mr-2" style="font-size:larger;" />
-                                <label class="check" for="genderF" style="font-size:14px;color:#808080;">Female</label>
+                                <label class="check" for="genderF" style="color:#808080;">Female</label>
                                 <input type="radio" name="gender" value="o" id="genderO" class="ml-3 mr-2" style="font-size:larger;" />
-                                <label class="check" for="genderO" style="font-size:14px;color:#808080;">Other</label>
+                                <label class="check" for="genderO" style="color:#808080;">Other</label>
                             </div>
                         </div>
-                        <div class="col-md-1"></div>
                     </div>
-                </div>
                 <div class="row">
-
                     <div class="form__group help-block">
                         <input type="checkbox" name="isDriver" value="true" id="isDriver" class="ml-3 mr-2" style="font-size:larger;" />
-                        <label for="isDriver" style="font-size:14px;color:#808080;">Register as Driver</label>
+                        <label for="isDriver" style="color:#c8c8c8;">Register as Driver</label>
                     </div>
                     <button class="btn" type="submit">Register</button>
-                    <div class="row text__login justify-content-center mt-3">
+                </div>
+                <div class="row">
+                     <div class="col-md-12 text__login justify-content-center mt-3">
                         <a href="login.php" class="text__login">Already have an account? Log In</a>
                     </div>
                 </div>

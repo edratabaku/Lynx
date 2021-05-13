@@ -95,6 +95,35 @@ if(isset($_POST["id"]) && !empty($_POST["id"])){
             echo "setTimeout(function{ window.location.href='userProfile.php?id='"+$id+";}, 5000);";
             echo "</script>";
         }
+        if (isset($_FILES['profileImage'])) {
+            // for the database
+            $profileImageName = time() . '-' . $_FILES["profileImage"]["name"];
+            // For image upload
+            $target_dir = "images/";
+            $target_file = $target_dir . basename($profileImageName);
+            // VALIDATION
+            // validate image size. Size is calculated in Bytes
+            if($_FILES['profileImage']['size'] > 200000) {
+                $profileImageError = "Image size should not be greated than 200Kb";
+            }
+            // check if file exists
+            if(file_exists($target_file)) {
+                $profileImageError = "File already exists";
+            }
+            // Upload image only if no errors
+            if (empty($profileImageError)) {
+                if(move_uploaded_file($_FILES["profileImage"]["tmp_name"], $target_file)) {
+                    $sql = "UPDATE users SET profileImage='$profileImageName' WHERE Id='$param_id'";
+                    if(mysqli_query($mysqli, $sql)){
+                        //file uploaded successfully
+                    } else {
+                        $profileImageError = "There was an error.";
+                    }
+                } else {
+                    $profileImageError = "There was an error uploading image.";
+                }
+            }
+        }
         //    //if($stmt = mysqli_prepare($mysqli, $sql)){
         //    //    // Bind variables to the prepared statement as parameters
         //    //    mysqli_stmt_bind_param($stmt, "sssssssi", $param_username, $param_email, $param_phoneNumber,$param_gender,$param_dateOfBirth,$param_firstName,$param_lastName, $param_id);
@@ -193,114 +222,132 @@ if(isset($_POST["id"]) && !empty($_POST["id"])){
     <title>View Record</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
     <style>
-        body {
-            background: #333333;
-            margin-top: 20px;
-            font-family: "system-ui" !important;
-            font-weight: 600;
+    body {
+        background: #333333;
+        margin-top: 20px;
+        font-family: "system-ui" !important;
+        font-weight: 600;
+    }
+
+    .card-box {
+        padding: 20px;
+        border-radius: 21px;
+        margin-bottom: 30px;
+        background-image: linear-gradient( 45deg, #383838, #030303);
+        color: white;
+        font-weight: 600;
+        box-shadow: 3px 0px 11px 2px #272727;
+    }
+
+        .card-box:hover {
+            box-shadow: 3px 0px 11px 2px #8a7129;
         }
 
-        .card-box {
-            padding: 20px;
-            border-radius: 21px;
-            margin-bottom: 30px;
-            background-image: linear-gradient( 45deg, #383838, #030303);
-            color: white;
-            font-weight: 600;
-            box-shadow: 3px 0px 11px 2px #272727;
+    .social-links li a {
+        border-radius: 50%;
+        color: rgba(121, 121, 121, .8);
+        display: inline-block;
+        height: 30px;
+        line-height: 27px;
+        border: 2px solid rgba(121, 121, 121, .5);
+        text-align: center;
+        width: 30px;
+    }
+
+        .social-links li a:hover {
+            color: #797979;
+            border: 2px solid #797979;
         }
 
-            .card-box:hover {
-                box-shadow: 3px 0px 11px 2px #8a7129;
-            }
+    .thumb-lg {
+        height: 88px;
+        width: 88px;
+    }
 
-        .social-links li a {
-            border-radius: 50%;
-            color: rgba(121, 121, 121, .8);
-            display: inline-block;
-            height: 30px;
-            line-height: 27px;
-            border: 2px solid rgba(121, 121, 121, .5);
-            text-align: center;
-            width: 30px;
-        }
+    .img-thumbnail {
+        padding: .25rem;
+        background-color: #fff;
+        border: 1px solid #dee2e6;
+        border-radius: .25rem;
+        max-width: 100%;
+        height: auto;
+    }
 
-            .social-links li a:hover {
-                color: #797979;
-                border: 2px solid #797979;
-            }
+    .text-pink {
+        color: #ff679b !important;
+    }
 
-        .thumb-lg {
-            height: 88px;
-            width: 88px;
-        }
+    .btn-rounded {
+        border-radius: 2em;
+    }
 
-        .img-thumbnail {
-            padding: .25rem;
-            background-color: #fff;
-            border: 1px solid #dee2e6;
-            border-radius: .25rem;
-            max-width: 100%;
-            height: auto;
-        }
+    .text-muted {
+        color: #c0c8cc !important;
+    }
 
-        .text-pink {
-            color: #ff679b !important;
-        }
+    h4 {
+        line-height: 22px;
+        font-size: 18px;
+    }
 
-        .btn-rounded {
-            border-radius: 2em;
-        }
+    .btn-golden {
+        font-family: "system-ui";
+        color: black;
+        background: #FFD700;
+        font-weight: 600;
+    }
 
-        .text-muted {
-            color: #c0c8cc !important;
-        }
+    .btn:hover {
+        opacity: 0.7;
+    }
 
-        h4 {
-            line-height: 22px;
-            font-size: 18px;
-        }
+    .btn-dark {
+        background: #343a40;
+        font-weight: 600;
+    }
 
-        .btn-golden {
-            font-family: "system-ui";
-            color: black;
-            background: #FFD700;
-            font-weight: 600;
-        }
+    .navbar {
+        background-color: rgba(0,0,0,0.1);
+    }
 
-        .btn:hover {
-            opacity: 0.7;
-        }
+    .navigation {
+        /* critical sizing and position styles */
+        width: 100%;
+        height: 100%;
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 0;
+        /* non-critical appearance styles */
+        list-style: none;
+        background: #111;
+    }
 
-        .btn-dark {
-            background: #343a40;
-            font-weight: 600;
-        }
+    .item {
+        /* non-critical appearance styles */
+        width: 200px;
+        border-top: 1px solid #111;
+        border-bottom: 1px solid #000;
+        display: block;
+        padding: 1em;
+        background: linear-gradient(135deg, rgba(0,0,0,0) 0%,rgba(0,0,0,0.65) 100%);
+        color: white;
+        font-size: 1.2em;
+        text-decoration: none;
+        transition: color 0.2s, background 0.5s;
+    }
+    /* Navigation Menu - List items */
+    .nav-item {
+        /* non-critical appearance styles */
+        width: 200px;
+        border-top: 1px solid #111;
+        border-bottom: 1px solid #000;
+    }
 
-        .navbar {
-            background-color: rgba(0,0,0,0.1);
-        }
-
-        .navigation {
-            /* critical sizing and position styles */
-            width: 100%;
-            height: 100%;
-            position: fixed;
-            top: 0;
-            right: 0;
-            bottom: 0;
-            left: 0;
-            z-index: 0;
+        .nav-item a {
             /* non-critical appearance styles */
-            list-style: none;
-            background: #111;
-        }
-
-        .item {
-            /* non-critical appearance styles */
-            width: 200px;
-            border-top: 1px solid #111;
-            border-bottom: 1px solid #000;
             display: block;
             padding: 1em;
             background: linear-gradient(135deg, rgba(0,0,0,0) 0%,rgba(0,0,0,0.65) 100%);
@@ -309,96 +356,135 @@ if(isset($_POST["id"]) && !empty($_POST["id"])){
             text-decoration: none;
             transition: color 0.2s, background 0.5s;
         }
-        /* Navigation Menu - List items */
-        .nav-item {
-            /* non-critical appearance styles */
-            width: 200px;
-            border-top: 1px solid #111;
-            border-bottom: 1px solid #000;
-        }
 
-            .nav-item a {
-                /* non-critical appearance styles */
-                display: block;
-                padding: 1em;
-                background: linear-gradient(135deg, rgba(0,0,0,0) 0%,rgba(0,0,0,0.65) 100%);
-                color: white;
-                font-size: 1.2em;
-                text-decoration: none;
-                transition: color 0.2s, background 0.5s;
+            .nav-item a:hover {
+                color: #FFD700;
+                background: linear-gradient(135deg, rgba(0,0,0,0) 0%,rgba(209, 176, 0,0.65) 100%);
             }
 
-                .nav-item a:hover {
-                    color: #FFD700;
-                    background: linear-gradient(135deg, rgba(0,0,0,0) 0%,rgba(209, 176, 0,0.65) 100%);
-                }
+    /* Site Wrapper - Everything that isn't navigation */
+    .site-wrap {
+        /* Critical position and size styles */
+        min-height: 100%;
+        min-width: 100%;
+        background-color: #111; /* Needs a background or else the nav will show through */
+        position: relative;
+        top: 0;
+        bottom: 100%;
+        left: 0;
+        z-index: 1;
+        /* non-critical apperance styles */
+        padding: 4em;
+        background-size: 200%;
+    }
 
-        /* Site Wrapper - Everything that isn't navigation */
-        .site-wrap {
-            /* Critical position and size styles */
-            min-height: 100%;
-            min-width: 100%;
-            background-color: #111; /* Needs a background or else the nav will show through */
-            position: relative;
-            top: 0;
-            bottom: 100%;
-            left: 0;
-            z-index: 1;
-            /* non-critical apperance styles */
-            padding: 4em;
-            background-size: 200%;
-        }
+    /* Nav Trigger */
+    .nav-trigger {
+        position: absolute;
+        clip: rect(0, 0, 0, 0);
+    }
 
-        /* Nav Trigger */
-        .nav-trigger {
-            position: absolute;
-            clip: rect(0, 0, 0, 0);
-        }
+    label[for="nav-trigger"] {
+        /* critical positioning styles */
+        position: fixed;
+        left: 15px;
+        top: 15px;
+        z-index: 2;
+        /* non-critical apperance styles */
+        height: 30px;
+        width: 30px;
+        cursor: pointer;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' version='1.1' x='0px' y='0px' width='30px' height='30px' viewBox='0 0 30 30' enable-background='new 0 0 30 30' xml:space='preserve'><rect width='30' height='6'/><rect y='24' width='30' height='6'/><rect y='12' width='30' height='6'/></svg>");
+        background-size: contain;
+    }
 
-        label[for="nav-trigger"] {
-            /* critical positioning styles */
-            position: fixed;
-            left: 15px;
-            top: 15px;
-            z-index: 2;
-            /* non-critical apperance styles */
-            height: 30px;
-            width: 30px;
-            cursor: pointer;
-            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' version='1.1' x='0px' y='0px' width='30px' height='30px' viewBox='0 0 30 30' enable-background='new 0 0 30 30' xml:space='preserve'><rect width='30' height='6'/><rect y='24' width='30' height='6'/><rect y='12' width='30' height='6'/></svg>");
-            background-size: contain;
-        }
-
-        /* Make the Magic Happen */
-        /*.nav-trigger + label, .site-wrap {
+    /* Make the Magic Happen */
+    /*.nav-trigger + label, .site-wrap {
         transition: left 0.2s;
     }*/
 
-        .nav-trigger:not(:checked) + label {
-            left: 215px;
+    .nav-trigger:not(:checked) + label {
+        left: 215px;
+    }
+
+    .nav-trigger:not(:checked) ~ .site-wrap {
+        left: 200px;
+        box-shadow: 0 0 5px 5px rgba(0,0,0,0.5);
+    }
+
+    /* Additional non-critical styles */
+    h1, h3, p {
+        max-width: 600px;
+        margin: 0 auto 1em;
+    }
+    /* Micro reset */
+    *, *:before, *:after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    #profileDisplay {
+        display: block;
+        height: 110px;
+        width: 25%;
+        margin: 0px auto;
+        border-radius: 50%;
+    }
+
+    .img-placeholder {
+        width: 40%;
+        color: white;
+        height: 100%;
+        background: black;
+        opacity: .7;
+        height: 150px;
+        border-radius: 50%;
+        z-index: 2;
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        display: none;
+    }
+
+        .img-placeholder h4 {
+            margin-top: 40%;
+            color: white;
         }
 
-        .nav-trigger:not(:checked) ~ .site-wrap {
-            left: 200px;
-            box-shadow: 0 0 5px 5px rgba(0,0,0,0.5);
+    .img-div:hover .img-placeholder {
+        display: block;
+        cursor: pointer;
+    }
+    </style > 
+    <script>
+        function triggerClick(e) {
+            document.querySelector('#profileImage').click();
         }
-
-        /* Additional non-critical styles */
-        h1, h3, p {
-            max-width: 600px;
-            margin: 0 auto 1em;
+        function displayImage(e) {
+            if (e.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    document.querySelector('#profileDisplay').setAttribute('src', e.target.result);
+                }
+                reader.readAsDataURL(e.files[0]);
+            }
         }
-        /* Micro reset */
-        *, *:before, *:after {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-    </style>
+    </script>
 </head>
 <body>
     <div class="row">
         <form class="form" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
+            <div class="form-group text-center" style="position: relative;">
+                <span class="img-div">
+                    <div class="text-center img-placeholder" onclick="triggerClick()">
+                        <h4>Upload image</h4>
+                    </div>
+                    <img src="images/avatar.png" onclick="triggerClick()" id="profileDisplay" />
+                </span>
+                <input type="file" name="profileImage" onchange="displayImage(this)" id="profileImage" class="form-control" style="display: none;" />
+                <label>Profile Image</label>
+            </div>
             <div class="row">
                 <div class="col-md-6">
                     <div class="row no-gutters">

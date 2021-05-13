@@ -166,6 +166,17 @@ if(isset($_GET["id"]) && !empty(trim($_GET["id"]))){
             font-weight: 600;
         }
 
+        .btn-info {
+            color: #fff;
+            background-color: transparent;
+            border-color: #ff9933;
+            margin-right: 12px;
+        }
+
+            .btn-info:hover {
+                background-color: #996900;
+                border-color: #f8f9fa;
+            }
         .navbar {
             background-color: rgba(0,0,0,0.1);
         }
@@ -234,8 +245,9 @@ if(isset($_GET["id"]) && !empty(trim($_GET["id"]))){
             left: 0;
             z-index: 1;
             /* non-critical apperance styles */
-            padding: 4em;
+            padding: 4em 1rem 5rem 4rem;
             background-size: 200%;
+            color: #ffffffb3;
         }
 
         /* Nav Trigger */
@@ -283,6 +295,52 @@ if(isset($_GET["id"]) && !empty(trim($_GET["id"]))){
             margin: 0;
             padding: 0;
         }
+
+        #profilePic {
+            width: 200px;
+            height: auto;
+            border-radius: 50%;
+            box-shadow: -9px 7px 16px #2f2006;
+        }
+
+        #watercolor {
+            z-index: -2;
+            position: absolute;
+            left: -33%;
+            width: 25vw;
+            top: -24%;
+        }
+
+        #returnHome {
+            color: rgb(146 199 255);
+        }
+
+        #title:hover {
+            color: #caa245;
+        }
+
+        #blackCircle {
+            z-index: -10;
+            position: absolute;
+            top: 0%;
+            width:39%;
+            animation: mymove 10s infinite;
+        }
+
+        @keyframes mymove {
+            0% {
+                left: 3%;
+            }
+
+            50% {
+                left: 5%;
+            }
+
+            100% {
+                left: 3%;
+            }
+        }
+
     </style>
     <script>
         function DeactivateAccount() {
@@ -324,35 +382,58 @@ if(isset($_GET["id"]) && !empty(trim($_GET["id"]))){
         <li class="nav-item">
             <a href="#">New requests</a>
         </li>
+<img src="Images/circle_PNG62.png" id="blackCircle"/>
     </ul>
 
     <input type="checkbox" id="nav-trigger" class="nav-trigger" />
     <!--<label for="nav-trigger"></label>-->
 
     <div class="site-wrap">
+        <div class="row">
+            <div class="col-md-8">
             <div class="row">
-                <div class="col-md-12 text-center mb-5">
-                    <h1 class="mt-5 mb-3">
-                        Detajet: <?php echo $row["Username"]?>
+                <div class="col-md-12 mb-5" style="padding-left:0px">
+                    <h1 class="mt-1 mb-3" id="title">
+                        <?php echo $row["FirstName"]?>
+                        <?php echo $row["LastName"]; ?>
                     </h1>
                 </div>
             </div>
-            <div class="form-group">
-                <label>Username:</label>
-                <?php echo $row["Username"]; ?>
+                <div class="row">
+                    <div class="col-md-8">
+                    <div class="form-group row">
+                        <label>Username: &nbsp;</label>
+                        <?php echo $row["Username"]; ?> 
+                    </div> 
+                    <div class="form-group row">
+                        <label>Email: &nbsp;</label>
+                        <?php echo $row["Email"]; ?>
+                    </div>
+                    </div>
+                    <div class="col-md-4">
+
+                    </div>
+
+                </div>
+
             </div>
-            <div class="form-group">
-                <label>First Name:</label>
-                <?php echo $row["FirstName"]; ?>
+            <div class="col-md-4">
+        <div>
+            <img src="<?php echo 'images/' . $row['profileImage'] ?>" id="profilePic" alt="" />
+            <img src="Images/wcgoldbg.png" id="watercolor"/>
+        </div>
             </div>
-            <div class="form-group">
-                <label>Last Name:</label>
-                <?php echo $row["LastName"]; ?>
-            </div>
-            <div class="form-group">
-                <label>Email:</label>
-                <?php echo $row["Email"]; ?>
-            </div>
+        </div>
+        <div class="row">
+            <?php echo '<a href="editProfile.php?id='.$Id.'" class="btn btn-info" style="font-size:16px;background-image: linear-gradient(45deg, #d89000, #553f00c9);">Edit Profile</a>'; ?>
+            <?php echo '<a href="editPassword.php?id='.$Id.'" class="btn btn-info" style="font-size:16px;">Change Password</a>'; ?>
+            <?php echo '<a href="#deleteEmployeeModal" class="btn btn-info" data-toggle="modal" style="font-size:16px;" data-id="'.$Id.'">Delete Account</a>'; ?>         
+            <?php echo '<input type="hidden" value="'.$Id.'" id="hiddenId">';?>
+       </div>
+        <div class="row mt-3">
+            <a href="home.php" id="returnHome" style="font-size:16px;">Return to main page</a>
+        </div>
+        </div>
         <!--<a href="#deleteEmployeeModal" class="delete" data-id="<?php echo $row["id"]; ?>" data-toggle="modal">
             <i class="material-icons" data-toggle="tooltip"
                 82
@@ -360,13 +441,6 @@ if(isset($_GET["id"]) && !empty(trim($_GET["id"]))){
                 
             </i>
         </a>-->
-            <?php echo '<a href="editProfile.php?id='.$Id.'" class="btn btn-info" style="font-size:16px;">Edit Profile</a>'; ?>
-            <?php echo '<a href="editPassword.php?id='.$Id.'" class="btn btn-info" style="font-size:16px;">Change Password</a>'; ?>
-            <?php echo '<a href="#deleteEmployeeModal" class="btn btn-info" data-toggle="modal" style="font-size:16px;" data-id="'.$Id.'">Delete Account</a>'; ?>
-            <a href="home.php" class="btn btn-default" style="font-size:16px;">Return to main page</a>
-        <?php echo '<input type="hidden" value="'.$Id.'" id="hiddenId">';?>
-
-       </div>
     <!--Modal-->
     <div class="modal fade" id="myModal">
         <div class="modal-dialog">
