@@ -419,7 +419,11 @@ if(isset($_GET["id"]) && !empty(trim($_GET["id"]))){
             </div>
             <div class="col-md-4">
         <div>
-            <img src="<?php echo 'images/' . $row['profileImage'] ?>" id="profilePic" alt="" />
+            <?php if($row['profileImage']==null){?>
+                <img src="Images/avatar.png" id="profilePic" alt=""/>
+
+            <?php } else{?>
+            <img src="<?php echo 'images/' . $row['profileImage'] ?>" id="profilePic" alt="" /><?php } ?>
             <img src="Images/wcgoldbg.png" id="watercolor"/>
         </div>
             </div>

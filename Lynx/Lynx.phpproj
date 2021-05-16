@@ -23,6 +23,7 @@
     <Compile Include="Administration\adminConfig.php" />
     <Compile Include="Administration\adminlayout.php" />
     <Compile Include="Administration\roles.php" />
+    <Compile Include="changeFormType.php" />
     <Compile Include="Comment.php" />
     <Compile Include="Complaint.php" />
     <Compile Include="configuration.php" />
@@ -56,6 +57,7 @@
     <Content Include="CSS\admin.css" />
     <Content Include="CSS\register.css" />
     <Content Include="CSS\authentication.css" />
+    <Content Include="CSS\toggleSwitch.css" />
     <Content Include="Fonts\quicksand.bold-regular.otf" />
     <Content Include="Fonts\quicksand.book-regular.otf" />
     <Content Include="Fonts\quicksand.light-regular.otf" />
@@ -65,6 +67,7 @@
     <Content Include="Images\circle_PNG62.png" />
     <Content Include="Images\oie_transparent %281%29.png" />
     <Content Include="Images\oie_transparent.png" />
+    <Content Include="Images\uploadImage.jpg" />
     <Content Include="Images\wcgoldbg.png" />
     <Content Include="Images\wp10.jpg" />
     <Content Include="Images\wp2.png" />
