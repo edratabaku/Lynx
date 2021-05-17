@@ -107,6 +107,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 <html>
 <head>
     <title>Sign In</title>
+    <link rel="icon" href="Images/logo2.png" />
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous" />
@@ -118,7 +119,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     <section class="back"></section>
     <div class="user">
         <header class="user__header">
-            <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/3219/logo.svg" alt="" />
+            <img src="Images/logo2.png" height="150"/>
             <h1 class="user__title">Sign in to access the app.</h1>
         </header>
 

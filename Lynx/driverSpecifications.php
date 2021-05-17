@@ -104,7 +104,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             // Upload image only if no errors
             if (empty($licenseImageError)) {
                 if(move_uploaded_file($_FILES["licenseImage"]["tmp_name"], $target_file)) {
-                    $sql = "INSERT INTO Drivers(Id,UserId,licensePhoto,IsApproved,IsBusy,IsBanned, IsActive) VALUES (?,?,?,?,?,?,?)";
+                    $sql = "INSERT INTO Drivers(Id,UserId,licensePhoto,Car,IsApproved,IsBusy,IsBanned, IsActive) VALUES (?,?,?,?,?,?,?,?)";
                     if($stmt = mysqli_prepare($mysqli, $sql)){
                         $param_isApproved = 0;
                         $param_isBusy = 0;
@@ -112,8 +112,9 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                         $param_isActive=1;
                         $param_id = uniqid();
                         $param_userId = $_SESSION["Id"];
+                        $param_car = trim($_POST["car"]);
                         $param_image = $licenseImageName;
-                        mysqli_stmt_bind_param($stmt,"sssssss", $param_id,$param_userId,$param_image,$param_isApproved,$param_isBusy,$param_isBanned,$param_isActive);
+                        mysqli_stmt_bind_param($stmt,"ssssssss", $param_id,$param_userId,$param_image,$param_car,$param_isApproved,$param_isBusy,$param_isBanned,$param_isActive);
                         if(mysqli_stmt_execute($stmt)){
                             session_start();
                             $_SESSION["loggedin"] = true;
@@ -139,24 +140,17 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 
 }
 ?>
+
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Regjistrohu</title>
+    <title>Sign In</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous" />
     <style type="text/css">
-<?php include 'CSS/authentication.css'; ?>        #profileDisplay {
-            display: block;
-            height: auto;
-            width: 16%;
-            margin: 0px auto;
-            border-radius: 10%;
-        }
-
-        .img-placeholder {
+<?php include 'CSS/authentication.css'; ?>        .img-placeholder {
             width: 18%;
             color: white;
             height: 81%;
@@ -179,12 +173,13 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             display: block;
             cursor: pointer;
         }
+
         input[type="checkbox"] {
-            -webkit-appearance: none ;
+            -webkit-appearance: none;
             -moz-appearance: none;
-             appearance: none;
+            appearance: none;
             -webkit-tap-highlight-color: transparent;
-             cursor: pointer;
+            cursor: pointer;
         }
 
         .toggle {
@@ -198,35 +193,39 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             background: linear-gradient(180deg, #2D2F39 0%, #1F2027 100%);
             transition: all .2s ease;
         }
-       .toggle::after{
-           content: '';
-           position: absolute;
-           top:2px;
-           left:2px;
-           width:24px;
-           height:24px;
-           border-radius: 50%;
-           background:white;
-           box-shadow: 0 1px 2px rgba(44,44,44,.2);
-           transition: all .2s cubic-bezier(.5,.1,.75,1.35);
-       }
-       .toggle:checked {
-           border-color: #654FEC;
-       }
-       .toggle:checked::after{
-           transform: translate(20px);
-       }
-    </style>
 
+            .toggle::after {
+                content: "";
+                position: absolute;
+                top: 2px;
+                left: 2px;
+                width: 24px;
+                height: 24px;
+                border-radius: 50%;
+                background: white;
+                box-shadow: 0 1px 2px rgba(44,44,44,.2);
+                transition: all .2s cubic-bezier(.5,.1,.75,1.35);
+            }
+
+            .toggle:checked {
+                border-color: #FFD700;
+            }
+
+                .toggle:checked::after {
+                    transform: translate(20px);
+                }
+    </style>
 </head>
 <body>
-    <div>
-        <header>
-            <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/3219/logo.svg" alt="" />
-            <h1 class="user__title">Sign up to access the app.</h1>
+    <section class="back"></section>
+    <div class="user">
+        <header class="user__header">
+            <img src="Images/logo2.png" height="150" />
+            <h1 class="user__title">Sign in to access the app.</h1>
         </header>
-        <input type="checkbox" class="toggle" id="formType" onchange="switching()" checked />
-        <div class="firstForm">
+        <br />
+        <input type="checkbox" class="toggle" id="formType" onchange="switching()" />
+        <div id="firstForm">
             <form class="form" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
                 <div class="form__group">
                     <input type="text" placeholder="License Id" class="form__input" name="licenseId" id="licenseId" value="<?php echo isset($_POST['licenseId']) ? htmlspecialchars($_POST['licenseId'], ENT_QUOTES) : ''; ?>" />
@@ -263,10 +262,11 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                     <a href="register.php" class="text__login">Cancel</a>
                 </div>
             </form>
-        </div>
-        <div class="fileForm" style="display:none;">
+            </div>
+        <div id="fileForm" style="display:none;">
             <form class="form" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post" enctype="multipart/form-data">
                 <div class="form-group text-center" style="position: relative;">
+                    <label>License Image</label>
                     <span class="img-div">
                         <div class="text-center img-placeholder" onclick="triggerClick()">
                             <h4>Upload image</h4>
@@ -274,20 +274,21 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                         <img src="images/uploadImage.jpg" onclick="triggerClick()" id="licenseDisplay" />
                     </span>
                     <input type="file" name="licenseImage" onchange="displayImage(this)" id="licenseImage" class="form-control" style="display: none;" />
-                    <label>License Image</label>
+
+                </div>
+                <div class="form__group" <?php echo(!empty($car_error))? 'has-error' : '' ?>>
+                    <textarea rows="4" cols="20" placeholder="Car Short Description" class="form__input" name="car" id="car" value="<?php echo isset($_POST['car']) ? htmlspecialchars($_POST['car'], ENT_QUOTES) : ''; ?>"></textarea>
+                    <span class="help-block text-danger pl-2">
+                        <?php echo $car_error ?>
+                    </span>
                 </div>
                 <button class="btn" type="submit">Register</button>
             </form>
         </div>
-        <div class="form__group" <?php echo(!empty($car_error))? 'has-error' : '' ?>>
-            <textarea rows="4" cols="20" placeholder="Car Short Description" class="form__input" name="car" id="car" value="<?php echo isset($_POST['car']) ? htmlspecialchars($_POST['car'], ENT_QUOTES) : ''; ?>"></textarea>
-            <span class="help-block text-danger pl-2">
-                <?php echo $car_error ?>
-            </span>
         </div>
-    </div>
 </body>
 </html>
+
 <script>
 
     function triggerClick(e) {
@@ -306,8 +307,8 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
         debugger;
         var selectedFormType = $("#formType").is(":checked");
         if (selectedFormType == true) {
-            $(".fileForm").show();
-            $(".firstForm").hide();
+            $("#fileForm").show();
+            $("#firstForm").hide();
             var formType = "file";
             $.ajax({
                 type: 'POST',
@@ -319,8 +320,8 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             });
         }
         else {
-            $(".fileForm").hide();
-            $(".firstForm").show();
+            $("#fileForm").hide();
+            $("#firstForm").show();
             var formType = "form";
             $.ajax({
                 type: 'POST',

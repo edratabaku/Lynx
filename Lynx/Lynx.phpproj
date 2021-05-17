@@ -65,6 +65,8 @@
     <Content Include="Images\black-and-gold.jpg" />
     <Content Include="Images\by1.jpg" />
     <Content Include="Images\circle_PNG62.png" />
+    <Content Include="Images\logo2.png" />
+    <Content Include="Images\logo_lynx.png" />
     <Content Include="Images\oie_transparent %281%29.png" />
     <Content Include="Images\oie_transparent.png" />
     <Content Include="Images\uploadImage.jpg" />
