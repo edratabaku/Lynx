@@ -119,7 +119,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                             session_start();
                             $_SESSION["loggedin"] = true;
                             $_SESSION["Id"] = $param_id;
-                            header("location: driverIndex.php");
+                            header("location: userProfile.php?id=$param_id");
                         }
                         //$sql = "UPDATE drivert SET profileImage='$profileImageName' WHERE Id='$param_id'";
                         //if(mysqli_query($mysqli, $sql)){

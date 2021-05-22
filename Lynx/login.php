@@ -1,5 +1,4 @@
 <?php
-
 include("layout.php");
 session_start();
 // Nese perdoruesi ka dhene kredencialet drejtoje te home
@@ -66,23 +65,23 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                                 $row = mysqli_fetch_array($result,MYSQLI_ASSOC);
                                 $roleName = $row["Name"];
                                 if($roleName == 'Administrator'){
-                                    $_SERVER["Role"] = "Administrator";
+                                    $_SESSION["Role"] = "Administrator";
                                     header("location: adminIndex.php");
                                 }
                                 else if ($roleName == 'Manager'){
-                                    $_SERVER["Role"] = "Manager";
+                                    $_SESSION["Role"] = "Manager";
                                     header("location: managerIndex.php");
                                 }
                                 else if($roleName == 'Supervisor'){
-                                    $_SERVER["Role"] = "Supervisor";
+                                    $_SESSION["Role"] = "Supervisor";
                                     header("location: supervisorIndex.php");
                                 }
                                 else if($roleName == "Driver"){
-                                    $_SERVER["Role"] = "Driver";
+                                    $_SESSION["Role"] = "Driver";
                                     header("location: driverIndex.php");
                                 }
                                 else {
-                                    $_SERVER["Role"] = "User";
+                                    $_SESSION["Role"] = "User";
                                     header("location: userLayout.php?page=index");
                                 }
                             }

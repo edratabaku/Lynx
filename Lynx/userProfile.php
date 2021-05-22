@@ -6,7 +6,7 @@ if(isset($_GET["id"]) && !empty(trim($_GET["id"]))){
     // Include config file
     require_once "configuration.php";
     $param_id = trim($_GET["id"]);
-    $result = mysqli_query($mysqli,"SELECT * FROM Users WHERE Id='$param_id'");
+    $result = mysqli_query($mysqli,"SELECT * FROM Users WHERE Id=$param_id");
      if(mysqli_num_rows($result) == 1){
          $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
          $Id = $row["Id"];
