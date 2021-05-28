@@ -28,6 +28,12 @@ $Id = $_SESSION["Id"];
     xmlhttp.open("GET", "filterDrivers.php?name=" + "", true);
     xmlhttp.send();
     </script>
+    <script>
+        $(document).ready(function () {
+            debugger;
+            searchText();
+        })
+    </script>
     <style>
         body {
             background: #333333;

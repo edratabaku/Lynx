@@ -24,7 +24,7 @@ if($name == null){
                     LicenseExpireDate,
                     OperatingArea,
                     Car,
-                    SupervisorId,
+                    ParentId,
                     IsApproved,
                     IsBusy FROM lynx.Drivers as d
               inner join Users as u on u.Id = d.userId
@@ -40,7 +40,7 @@ if($name == null){
                      $driver->set_lastName($r["LastName"]);
                      $driver->set_id($r["Id"]);
                      $driver->set_userId($r["UserId"]);
-                     $driver->set_supervisorId($r["SupervisorId"]);
+                     $driver->set_supervisorId($r["ParentId"]);
                      $driver->set_licenseId($r["LicenseId"]);
                      $driver->set_licenseDate($r["LicenseDate"]);
                      $driver->set_licenseExpireDate($r["LicenseExpireDate"]);
@@ -140,7 +140,7 @@ else {
                     LicenseExpireDate,
                     OperatingArea,
                     Car,
-                    SupervisorId,
+                    u.ParentId,
                     IsApproved,
                     IsBusy FROM lynx.Drivers as d
               inner join Users as u on u.Id = d.userId
@@ -158,7 +158,7 @@ else {
                      $driver->set_lastName($r["LastName"]);
                      $driver->set_id($r["Id"]);
                      $driver->set_userId($r["UserId"]);
-                     $driver->set_supervisorId($r["SupervisorId"]);
+                     $driver->set_supervisorId($r["ParentId"]);
                      $driver->set_licenseId($r["LicenseId"]);
                      $driver->set_licenseDate($r["LicenseDate"]);
                      $driver->set_licenseExpireDate($r["LicenseExpireDate"]);
