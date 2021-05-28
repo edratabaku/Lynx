@@ -35,6 +35,7 @@
     <Compile Include="editProfile.php" />
     <Compile Include="filterRequests.php" />
     <Compile Include="Request.php" />
+    <Compile Include="sorryToSeeYouGo.php" />
     <Compile Include="userProfile.php" />
     <Compile Include="userLayout.php" />
     <Compile Include="driverSpecifications.php" />

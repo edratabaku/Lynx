@@ -80,7 +80,19 @@ if(isset($_GET["id"]) && !empty(trim($_GET["id"]))){
 <head>
     <meta charset="UTF-8" />
     <title>View Record</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Varela+Round" />
+    
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+   
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
     <style>
         body {
             background: #333333;
@@ -342,24 +354,6 @@ if(isset($_GET["id"]) && !empty(trim($_GET["id"]))){
         }
 
     </style>
-    <script>
-        function DeactivateAccount() {
-            debugger
-            $("#myModal").modal('show');
-        }
-        function ConfirmDeactivateAccount() {
-            debugger
-            var xmlhttp = new XMLHttpRequest();
-            xmlhttp.onreadystatechange = function () {
-                if (this.readyState == 4 && this.status == 200) {
-                    window.location.href = "logout.php";
-                }
-            }
-            var userId = document.getElementById("hiddenId");
-            xmlhttp.open("POST", "deleteAccount.php?id=" + userId, true);
-            xmlhttp.send();
-        }
-    </script>
 </head>
 <body>
     <ul class="navigation">
@@ -431,51 +425,30 @@ if(isset($_GET["id"]) && !empty(trim($_GET["id"]))){
         <div class="row">
             <?php echo '<a href="editProfile.php?id='.$Id.'" class="btn btn-info" style="font-size:16px;background-image: linear-gradient(45deg, #d89000, #553f00c9);">Edit Profile</a>'; ?>
             <?php echo '<a href="editPassword.php?id='.$Id.'" class="btn btn-info" style="font-size:16px;">Change Password</a>'; ?>
-            <?php echo '<a href="#deleteEmployeeModal" class="btn btn-info" data-toggle="modal" style="font-size:16px;" data-id="'.$Id.'">Delete Account</a>'; ?>         
+            <?php echo '<a href="#deleteEmployeeModal" class="delete btn btn-info" data-id="'.$Id.'" data-toggle="modal">
+                Deactivate Account
+            </a>'; ?>
             <?php echo '<input type="hidden" value="'.$Id.'" id="hiddenId">';?>
        </div>
-        <div class="row mt-3">
+        <!--<div class="row mt-3">
             <a href="home.php" id="returnHome" style="font-size:16px;">Return to main page</a>
+        </div>-->
         </div>
-        </div>
-        <!--<a href="#deleteEmployeeModal" class="delete" data-id="<?php echo $row["id"]; ?>" data-toggle="modal">
-            <i class="material-icons" data-toggle="tooltip"
-                82
-                title="Delete">
-                
-            </i>
-        </a>-->
-    <!--Modal-->
-    <div class="modal fade" id="myModal">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <a href="#" class="close" data-dismiss="modal">&times;</a>
-                    <h3 class="modal-title">Confirm deactivation</h3>
-                </div>
-                <div class="modal-body">
-                    <h6>This action is permanent and can not be reverted.</h6>
-                </div>
-                <div class="modal-footer">
-                    <a href="#" class="btn btn-success" onclick="ConfirmDeactivateAccount()">Confirm</a>
-                    <a href="#" class="btn btn-danger" data-dismiss="modal">Cancel</a>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Delete modal-->
+    <!-- Delete Modal HTML -->
     <div id="deleteEmployeeModal" class="modal fade">
         <div class="modal-dialog">
             <div class="modal-content">
                 <form>
                     <div class="modal-header">
-                        <h4 class="modal-title">Deactivate account</h4>
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">x</button>
+                        <h4 class="modal-title">Delete Student  </h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                     </div>
                     <div class="modal-body">
                         <input type="hidden" id="id_d" name="id" class="form-control" />
-                        <p>Are you sure your want to deactivate your account?</p>
-                        <p class="text-warning"><small>This action is permanent.</small></p>
+                        <p>Are you sure you want to deactivate your account?</p>
+                        <p class="text-warning">
+                            <small>This action is permanent and cannot be undone.</small>
+                        </p>
                     </div>
                     <div class="modal-footer">
                         <input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel" />
@@ -486,5 +459,28 @@ if(isset($_GET["id"]) && !empty(trim($_GET["id"]))){
         </div>
     </div>
 
+
 </body>
 </html>
+<script type="text/javascript">
+    $(document).on("click", ".delete", function() {
+        var id=$(this).attr("data-id");
+        $('#id_d').val(id);
+    });
+    $(document).on("click", "#delete", function() {
+        $.ajax({
+        url: "deleteAccount.php",
+        type: "POST",
+        cache: false,
+        data:{
+            type:3,
+            id: $("#id_d").val()
+        },
+        success: function(dataResult){
+            //location.reload();
+            $('#deleteEmployeeModal').modal('hide');
+            window.location.href = 'sorryToSeeYouGo.php';
+        }
+    });
+    });
+</script>

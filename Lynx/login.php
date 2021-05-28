@@ -39,7 +39,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
         $password = trim($_POST["password"]);
     }
     if(empty($username_error) && empty($password_error)){
-        $sql = "SELECT Id, Email, Username, Password, IsActive, RoleId, FirstName, LastName FROM Users WHERE Email = ? OR Username=? OR PhoneNumber=?";
+        $sql = "SELECT Id, Email, Username, Password, IsActive, RoleId, FirstName, LastName FROM Users WHERE (Email = ? OR Username=? OR PhoneNumber=?) AND IsActive=1";
         if($stmt = mysqli_prepare($mysqli,$sql)){
             $param_username = $username;
             mysqli_stmt_bind_param($stmt,"sss", $param_username, $param_username, $param_username);
@@ -88,7 +88,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                         }
                         else{ $password_error = "Password is incorrect.";}
                     }
-                } else{ $email_error = "No existing account.";}
+                } else{ $username_error = "No existing account.";}
             } else{ echo "Error. Please try again.";}
             // Close statement
 
