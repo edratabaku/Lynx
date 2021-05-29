@@ -12,7 +12,7 @@ $firstName="";
 $lastName="";
 $phoneNumber="";
 $dateOfBirth = "";
-$gender = "";
+ $gender = "";
 //initializing error validation messages
 $email_error=$password_error=$username_error=$confirmPassword_error=$firstName_error=$lastName_error=$phoneNumber_error=$dateOfBirth_error=$gender_error="";
 $profileImageError="";
@@ -129,6 +129,9 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     else{
         $gender_error = "Please specify your gender";
     }
+    if(!filter_var($email, FILTER_VALIDATE_EMAIL)){
+        $email_error = "Invalid email format";
+    }
     //check if there are any errors
     if(empty($email_error) && empty($password_error) && empty($confirmPassword_error) && empty($username_error)&&empty($phoneNumber_error)&&empty($dateOfBirth_error)&&empty($gender_error)){
         //prepare statement
@@ -146,7 +149,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             $param_lastName= $lastName;
             $param_isActive = true;
             //if user wants to register as driver
-            if(isset($_POST["isDriver"]) && $_POST["isDriver"]==true){
+             if(isset($_POST["isDriver"]) && $_POST["isDriver"]==true){
                 $param_roleName = "Driver";
                 //get the ide of the driver role
                 $result = mysqli_query($mysqli,"SELECT Id, Name FROM Roles WHERE Name='$param_roleName'");
@@ -212,11 +215,13 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                 }
                 if(isset($_POST["isDriver"]) && $_POST["isDriver"]==true){
                     $_SESSION["Role"] = "Driver";
-                    header("location:driverSpecifications.php");
+                    header("location:send_email.php");
+                    //header("location:driverSpecifications.php");
                 }
                 else{
                     $_SESSION["Role"] = "User";
-                    header("location: userLayout.php?page=index");
+                    header("location:send_email.php");
+                    //header("location: userLayout.php?page=index");
                 }
             }
             else{

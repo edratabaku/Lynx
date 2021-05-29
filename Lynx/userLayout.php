@@ -9,24 +9,24 @@ $Id = $_SESSION["Id"];
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous" />
     <link href='https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css' rel='stylesheet' />
     <script type="text/javascript">
-    function searchText(str){
+        function searchText(str) {
+            var xmlhttp = new XMLHttpRequest();
+            xmlhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    document.getElementById("results").innerHTML = this.responseText;
+                }
+            }
+            xmlhttp.open("GET", "filterDrivers.php?name=" + str, true);
+            xmlhttp.send();
+        }
         var xmlhttp = new XMLHttpRequest();
         xmlhttp.onreadystatechange = function () {
             if (this.readyState == 4 && this.status == 200) {
                 document.getElementById("results").innerHTML = this.responseText;
             }
         }
-        xmlhttp.open("GET", "filterDrivers.php?name=" + str, true);
+        xmlhttp.open("GET", "filterDrivers.php?name=" + "", true);
         xmlhttp.send();
-    }
-    var xmlhttp = new XMLHttpRequest();
-    xmlhttp.onreadystatechange = function () {
-        if (this.readyState == 4 && this.status == 200) {
-            document.getElementById("results").innerHTML = this.responseText;
-        }
-    }
-    xmlhttp.open("GET", "filterDrivers.php?name=" + "", true);
-    xmlhttp.send();
     </script>
     <script>
         $(document).ready(function () {
@@ -38,8 +38,8 @@ $Id = $_SESSION["Id"];
         body {
             background: #333333;
             margin-top: 20px;
-            font-family:"system-ui" !important;
-            font-weight:600;
+            font-family: "system-ui" !important;
+            font-weight: 600;
         }
 
         .card-box {
@@ -50,7 +50,7 @@ $Id = $_SESSION["Id"];
             color: white;
             font-weight: 600;
             box-shadow: 3px 0px 11px 2px #272727;
-            }
+        }
 
             .card-box:hover {
                 box-shadow: 3px 0px 11px 2px #8a7129;
@@ -95,30 +95,34 @@ $Id = $_SESSION["Id"];
         }
 
         .text-muted {
-            color: #c0c8cc!important;
+            color: #c0c8cc !important;
         }
 
         h4 {
             line-height: 22px;
             font-size: 18px;
         }
+
         .btn-golden {
             font-family: "system-ui";
             color: black;
             background: #FFD700;
-            font-weight:600;
+            font-weight: 600;
         }
 
-            .btn:hover {
-                opacity:0.7;
-            }
+        .btn:hover {
+            opacity: 0.7;
+        }
+
         .btn-dark {
             background: #343a40;
             font-weight: 600;
         }
+
         .navbar {
             background-color: rgba(0,0,0,0.1);
         }
+
         .navigation {
             /* critical sizing and position styles */
             width: 100%;
@@ -232,34 +236,31 @@ $Id = $_SESSION["Id"];
             margin: 0;
             padding: 0;
         }
-
-
-
-
-
     </style>
 
 </head>
 <body>
-     <ul class="navigation" >
-        <li class="item">Administration</li>
+    <ul class="navigation">
+        <li class="item">
+            <img src="Images/logo2.png" height="150" />
+        </li>
         <li class="nav-item">
-            <a href="#">Home</a>
+            <a href="userLayout.php?page=index">Home</a>
         </li>
         <li class="nav-item">
             <?php echo '<a href="userProfile.php?id='.$Id.'">Profile</a>';?>
         </li>
         <li class="nav-item">
-            <a href="#">Drivers</a>
+            <a href="#">Past Services</a>
         </li>
         <li class="nav-item">
-            <a href="#">Supervisors</a>
+            <a href="#">Awaiting Services</a>
         </li>
         <li class="nav-item">
-            <a href="#">Managers</a>
+            <a href="#">Your reviews</a>
         </li>
         <li class="nav-item">
-            <a href="#">New requests</a>
+            <a href="#">Your complaints</a>
         </li>
     </ul>
 

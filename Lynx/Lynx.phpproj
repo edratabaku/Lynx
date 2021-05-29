@@ -20,6 +20,7 @@
     <IncludeDebugInformation>false</IncludeDebugInformation>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="addService.php" />
     <Compile Include="Administration\adminConfig.php" />
     <Compile Include="Administration\adminlayout.php" />
     <Compile Include="Administration\roles.php" />
@@ -34,7 +35,10 @@
     <Compile Include="editPassword.php" />
     <Compile Include="editProfile.php" />
     <Compile Include="filterRequests.php" />
+    <Compile Include="pastServices.php" />
     <Compile Include="Request.php" />
+    <Compile Include="requireService.php" />
+    <Compile Include="send_email.php" />
     <Compile Include="sorryToSeeYouGo.php" />
     <Compile Include="userProfile.php" />
     <Compile Include="userLayout.php" />
@@ -45,6 +49,7 @@
     <Compile Include="logout.php" />
     <Compile Include="register.php" />
     <Compile Include="filterDrivers.php" />
+    <Compile Include="verify_email.php" />
     <Compile Include="Views\layout.php" />
   </ItemGroup>
   <ItemGroup>

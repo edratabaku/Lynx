@@ -1,98 +1,68 @@
 <?php
-include("layout.php");
 session_start();
-// Check existence of id parameter before processing further
-if(isset($_GET["id"]) && !empty(trim($_GET["id"]))){
-    // Include config file
-    require_once "configuration.php";
-    $param_id = trim($_GET["id"]);
-    $result = mysqli_query($mysqli,"SELECT * FROM Users WHERE Id='$param_id'");
-     if(mysqli_num_rows($result) == 1){
-         $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
-         $Id = $row["Id"];
-                     $username = $row["Username"];
-                     $email = $row["Email"];
-                     $phoneNumber = $row["PhoneNumber"];
-                     $firstName = $row["FirstName"];
-                     $lastName = $row["LastName"];
-                     $isActive= $row["IsActive"];
-                     $isBanned = $row["IsBanned"];
-                     $dateOfBirth = $row["DateOfBirth"];
-                     $gender = $row["Gender"];
-     }
-     else{exit();}
-
-    if ($_SESSION["Role"]=="Driver"){
-        // Prepare a select statement
-        $sql = "SELECT Id, UserId, LicenseId, LicenseDate, LicenseExpireDate, OperatingArea, Car, IsApproved, IsBusy from Drivers WHERE UserId=?";
-
-        if($stmt = mysqli_prepare($mysqli, $sql)){
-            // Bind variables to the prepared statement as parameters
-            mysqli_stmt_bind_param($stmt, "i", $param_id);
-
-            // Set parameters
-            $param_id = trim($_GET["id"]);
-
-            // Attempt to execute the prepared statement
-            if(mysqli_stmt_execute($stmt)){
-                $result = mysqli_stmt_get_result($stmt);
-
-                if(mysqli_num_rows($result) == 1){
-                    /* Fetch result row as an associative array. Since the result set
-                    contains only one row, we don't need to use while loop */
-                    $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
-
-                    // Retrieve individual field value
-                    $driverId = $row["Id"];
-                    $userId = $row["UserId"];
-                    $licenseId = $row["LicenseId"];
-                    $licenseDate = $row["LicenseDate"];
-                    $licenseExpireDate = $row["LicenseExpireDate"];
-                    $operatingArea = $row["OperatingArea"];
-                    $car = $row["Car"];
-                    $isApproved = $row["IsApproved"];
-                    $isBusy = $row["IsBusy"];
-
-                } else{
-                    // URL doesn't contain valid id parameter. Redirect to error page
-                    header("location: error.php");
-                    exit();
-                }
-
-            } else{
-                echo "Oops! Something went wrong. Please try again later.";
-            }
-        }
-
+require_once "configuration.php";
+$date_error=$time_error=$address_error=$destination_error="";
+if($_SERVER["REQUEST_METHOD"]=="GET"){
+    if(isset($_GET["id"]) && !empty(trim($_GET["id"]))){
+        $param_userid = trim($_GET["id"]);
     }
-    mysqli_stmt_close($stmt);
-    // Close connection
-    mysqli_close($mysqli);
-} else{
-    // URL doesn't contain id parameter. Redirect to error page
-    header("location: error.php");
-    exit();
+    else{
+        $param_userid = $_SESSION["Id"];
+    }
+    $_SESSION["serviceUserId"] = $param_userid;
+    if(isset($_GET["driverId"]) && !empty(trim($_GET["driverId"]))){
+        $param_driverId = trim($_GET["driverId"]);
+    }
+    $_SESSION["serviceDriverId"] = $param_driverId;
 }
-?>
+if($_SERVER["REQUEST_METHOD"]=="POST"){
+    $param_driver = $_SESSION["serviceDriverId"];
+    $param_user = $_SESSION["serviceUserId"];
+    if(empty(trim($_POST["date"]))){
+        $date_error = "You must enter the service date";
+    }
+    else{
+        $date = trim($_POST["date"]);
+    }
+    if(empty(trim($_POST["time"]))){
+        $time_error = "You must enter the service time";
+    }
+    else{
+        $time = trim($_POST["time"]);
+    }
+    if(empty(trim($_POST["address"]))){
+        $address_error = "You must enter your address";
+    }
+    else{
+        $address = trim($_POST["address"]);
+    }
+    if(empty(trim($_POST["destination"]))){
+        $destination_error = "You must enter a destination";
+    }
+    else{
+        $destination = trim($_POST["destination"]);
+    }
+    if(empty($date_error) && empty($time_error) && empty($address_error) && empty($destination_error)){
+        $param_id = uniqid();
+        $service_time = date('Y-m-d h:i:s',strtotime($_POST['date'].' '.$_POST['time']));
+        $result = mysqli_query($mysqli,"INSERT INTO Requests(Id, RequestedById, DriverId, TimeOfRequest, IsAccepted, IsSeen) values ('$param_id','$param_user','$param_driver','$service_time',0,0);");
+        if($result){
+
+        }
+        else{
+            header("location: error.php");
+        }
+    }
+}
+
+mysqli_close($mysqli); ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
     <title>View Record</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Varela+Round" />
-    
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
-    
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
-   
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
-    
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
     <style>
         body {
             background: #333333;
@@ -352,137 +322,94 @@ if(isset($_GET["id"]) && !empty(trim($_GET["id"]))){
                 left: 3%;
             }
         }
-
+<?php include 'CSS/authentication.css'; ?>
     </style>
 </head>
 <body>
     <ul class="navigation">
-        <li class="item">
-            <img src="Images/logo2.png" height="150" />
-        </li>
+        <li class="item">Administration</li>
         <li class="nav-item">
-            <a href="userLayout.php?page=index">Home</a>
+            <a href="#">Home</a>
         </li>
         <li class="nav-item">
             <?php echo '<a href="userProfile.php?id='.$Id.'">Profile</a>';?>
         </li>
         <li class="nav-item">
-            <a href="#">Past Services</a>
+            <a href="#">Drivers</a>
         </li>
         <li class="nav-item">
-            <a href="#">Awaiting Services</a>
+            <a href="#">Supervisors</a>
         </li>
         <li class="nav-item">
-            <a href="#">Your reviews</a>
+            <a href="#">Managers</a>
         </li>
         <li class="nav-item">
-            <a href="#">Your complaints</a>
+            <a href="#">New requests</a>
         </li>
-<img src="Images/circle_PNG62.png" id="blackCircle"/>
+        <img src="Images/circle_PNG62.png" id="blackCircle" />
     </ul>
 
     <input type="checkbox" id="nav-trigger" class="nav-trigger" />
     <!--<label for="nav-trigger"></label>-->
 
     <div class="site-wrap">
-        <div class="row">
-            <div class="col-md-8">
-            <div class="row">
-                <div class="col-md-12 mb-5" style="padding-left:0px">
-                    <h1 class="mt-1 mb-3" id="title">
-                        <?php echo $row["FirstName"]?>
-                        <?php echo $row["LastName"]; ?>
-                    </h1>
-                </div>
+        <!--<header class="user__header">
+            <img src="Images/logo2.png" height="150" />
+            <h1 class="user__title">These changes are permanent and cannot be reverted.</h1>
+        </header>-->
+        <!--<input type="hidden" id="id" name="id" value="<?php $param_userid?>" />
+        <input type="hidden" id="driverId" name="driverId" value="<?php $param_driverId?>" />-->
+        <form class="form" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
+
+            <div class="form__group" <?php echo(!empty($date_error))? 'has-error' : '' ?>>
+                <input type="date" placeholder="Date" class="form__input" name="date" id="date" />
+                <span class="help-block text-danger">
+                    <?php echo $date_error ?>
+                </span>
             </div>
-                <div class="row">
-                    <div class="col-md-8">
-                    <div class="form-group row">
-                        <label>Username: &nbsp;</label>
-                        <?php echo $row["Username"]; ?> 
-                    </div> 
-                    <div class="form-group row">
-                        <label>Email: &nbsp;</label>
-                        <?php echo $row["Email"]; ?>
-                    </div>
-                    </div>
-                    <div class="col-md-4">
 
-                    </div>
-
-                </div>
-
+            <div class="form__group" <?php echo(!empty($time_error))? 'has-error': ''?>>
+                <input type="time" placeholder="Time" class="form__input" name="time" id="time" />
+                <span class="help-block text-danger">
+                    <?php echo $time_error ?>
+                </span>
             </div>
-            <div class="col-md-4">
-        <div>
-            <?php if($row['profileImage']==null){?>
-                <img src="Images/avatar.png" id="profilePic" alt=""/>
 
-            <?php } else{?>
-            <img src="<?php echo 'images/' . $row['profileImage'] ?>" id="profilePic" alt="" /><?php } ?>
-            <img src="Images/wcgoldbg.png" id="watercolor"/>
-        </div>
+            <div class="form__group" <?php echo(!empty($confirmNewPassword_error))? 'has-error': ''?>>
+                <input type="text" placeholder="Address" class="form__input" name="address" id="address" />
+                <span class="help-block text-danger">
+                    <?php echo $address_error ?>
+                </span>
             </div>
-        </div>
-        <div class="row">
-            <?php echo '<a href="editProfile.php?id='.$Id.'" class="btn btn-info" style="font-size:16px;background-image: linear-gradient(45deg, #d89000, #553f00c9);">Edit Profile</a>'; ?>
-            <?php echo '<a href="editPassword.php?id='.$Id.'" class="btn btn-info" style="font-size:16px;">Change Password</a>'; ?>
-            <?php echo '<a href="#deleteEmployeeModal" class="delete btn btn-info" data-id="'.$Id.'" data-toggle="modal">
-                Deactivate Account
-            </a>'; ?>
-            <?php echo '<input type="hidden" value="'.$Id.'" id="hiddenId">';?>
-       </div>
-        <!--<div class="row mt-3">
-            <a href="home.php" id="returnHome" style="font-size:16px;">Return to main page</a>
-        </div>-->
-        </div>
-    <!-- Delete Modal HTML -->
-    <div id="deleteEmployeeModal" class="modal fade">
+
+            <div class="form__group" <?php echo(!empty($destination_error))? 'has-error': ''?>>
+                <input type="text" placeholder="Destination" class="form__input" name="destination" id="destination" />
+                <span class="help-block text-danger">
+                    <?php echo $destination_error ?>
+                </span>
+            </div>
+            <button class="btn" type="submit">Confirm</button>
+        </form>
+        <button class="btn btn-info" id="myBtn" onclick="goBack()">Cancel</button>
+    </div>
+    <div class="modal fade" id="thankyouModal" tabindex="-1" role="dialog">
         <div class="modal-dialog">
             <div class="modal-content">
-                <form>
-                    <div class="modal-header">
-                        <h4 class="modal-title">Delete Student  </h4>
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                    </div>
-                    <div class="modal-body">
-                        <input type="hidden" id="id_d" name="id" class="form-control" />
-                        <p>Are you sure you want to deactivate your account?</p>
-                        <p class="text-warning">
-                            <small>This action is permanent and cannot be undone.</small>
-                        </p>
-                    </div>
-                    <div class="modal-footer">
-                        <input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel" />
-                        <button type="button" class="btn btn-danger" id="delete">Delete</button>
-                    </div>
-                </form>
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel">Thank you for pre-registering!</h4>
+                </div>
+                <div class="modal-body">
+                    <p>Thanks for getting in touch!</p>
+                </div>
             </div>
         </div>
     </div>
-
-
 </body>
 </html>
-<script type="text/javascript">
-    $(document).on("click", ".delete", function() {
-        var id=$(this).attr("data-id");
-        $('#id_d').val(id);
-    });
-    $(document).on("click", "#delete", function() {
-        $.ajax({
-        url: "deleteAccount.php",
-        type: "POST",
-        cache: false,
-        data:{
-            type:3,
-            id: $("#id_d").val()
-        },
-        success: function(dataResult){
-            //location.reload();
-            $('#deleteEmployeeModal').modal('hide');
-            window.location.href = 'sorryToSeeYouGo.php';
-        }
-    });
-    });
+<script>
+    debugger
+    function goBack() {
+        window.history.back();
+    }
 </script>
