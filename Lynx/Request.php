@@ -16,13 +16,13 @@ class Request
     public $timeOfRequest;
     public $isAccepted;
     public $isSeen;
-    public $id;
+    public $requestedById;
 
-    function set_id($id){
-        $this->id = $id;
+    function set_requestedById($requestedById){
+        $this->requestedById = $requestedById;
     }
-    function get_id() {
-        return $this->id;
+    function get_requestedById() {
+        return $this->requestedById;
     }
     function set_driverId($id){
         $this->driverId = $id;
