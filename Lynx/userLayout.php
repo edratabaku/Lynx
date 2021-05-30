@@ -2,6 +2,7 @@
 session_start();
 require_once "configuration.php";
 $Id = $_SESSION["Id"];
+$role = $_SESSION["Role"];
 ?>
 
 <html>
@@ -40,6 +41,7 @@ $Id = $_SESSION["Id"];
             margin-top: 20px;
             font-family: "system-ui" !important;
             font-weight: 600;
+            overflow-x:hidden;
         }
 
         .card-box {
@@ -159,6 +161,9 @@ $Id = $_SESSION["Id"];
             border-bottom: 1px solid #000;
         }
 
+        .container{
+            margin-left:0px;
+        }
             .nav-item a {
                 /* non-critical appearance styles */
                 display: block;
@@ -251,16 +256,19 @@ $Id = $_SESSION["Id"];
             <?php echo '<a href="userProfile.php?id='.$Id.'">Profile</a>';?>
         </li>
         <li class="nav-item">
-            <a href="#">Past Services</a>
+            <?php echo '<a href="pastServices.php?id='.$Id.'&role='.$role.'">Past Services</a>';?>
         </li>
         <li class="nav-item">
-            <a href="#">Awaiting Services</a>
+            <?php echo '<a href="awaitingServices.php?id='.$Id.'&role='.$role.'">Awaiting Services</a>';?>
         </li>
         <li class="nav-item">
-            <a href="#">Your reviews</a>
+            <?php echo '<a href="yourReviews.php?id='.$Id.'">Your reviews</a>';?>
         </li>
         <li class="nav-item">
-            <a href="#">Your complaints</a>
+            <?php echo '<a href="yourComplaints.php?id='.$Id.'">Your complaints</a>';?>
+        </li>
+        <li class="nav-item">
+            <?php echo '<a href="logout.php">Sign Out</a>';?>
         </li>
     </ul>
 

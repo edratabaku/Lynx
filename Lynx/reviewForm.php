@@ -1,82 +1,50 @@
 <?php
 session_start();
 require_once "configuration.php";
-$oldPassword_error=$newPassword_error=$confirmNewPassword_error="";
-if(isset($_GET["id"])&& !empty(trim($_GET["id"]))){
-    $param_id = trim($_GET["id"]);
-    $result = mysqli_query($mysqli,"SELECT Password,r.Name as RoleName FROM USERS INNER JOIN Roles AS R ON RoleId = R.Id WHERE Id='$param_id'");
-    if(mysqli_num_rows($result)==1){
-        $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
-        $param_oldPassword = $row["Password"];
-        $param_roleName = $row["RoleName"];
-    }
-}
-else{
-    $param_id = $_SESSION["Id"];
-    $result = mysqli_query($mysqli,"SELECT Password,r.Name as RoleName FROM USERS INNER JOIN Roles AS R ON RoleId = R.Id WHERE Id='$param_id'");
-    if(mysqli_num_rows($result)==1){
-        $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
-        $param_oldPassword = $row["Password"];
-        $param_roleName = $row["RoleName"];
-    }
-}
-if($_SERVER["REQUEST_METHOD"] == "POST"){
-    if(empty(trim($_POST["oldPassword"]))){
-        $oldPassword_error = "You must enter your old password.";
-    } else{
-        $oldPassword = trim($_POST["oldPassword"]);
-    }
-    if(empty(trim($_POST["newPassword"]))){
-        $newPassword_error = "You must enter your new password.";
-    }
-    else if(strlen(trim($_POST["newPassword"]))<8){
-        $newPassword_error = "Your password must contain at least 8 characters.";
+if($_SERVER["REQUEST_METHOD"]=="GET"){
+    if(isset($_GET["id"]) && !empty(trim($_GET["id"]))){
+        $param_userid = trim($_GET["id"]);
     }
     else{
-        $newPassword = trim($_POST["newPassword"]);
+        $param_userid = $_SESSION["Id"];
     }
-    if(empty(trim($_POST["confirmNewPassword"]))){
-        $confirmNewPassword_error = "You must confirm your new password.";
+    $_SESSION["reviewUserId"] = $param_userid;
+    if(isset($_GET["driverId"]) && !empty(trim($_GET["driverId"]))){
+        $param_driverId = trim($_GET["driverId"]);
     }
-    else if(strcmp($_POST["confirmNewPassword"],$_POST["newPassword"]) != 0){
-        $confirmPassword_error = "Your new password and confirm password do not match.";
+    $_SESSION["reviewDriverId"] = $param_driverId;
+     $result = mysqli_query($mysqli,"SELECT u.FirstName, u.LastName from Drivers as d inner join Users as u on u.Id = d.UserId where d.Id='$param_driverId'");
+     if(mysqli_num_rows($result)==1){
+          $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
+          $driverName = $row["FirstName"]." ".$row["LastName"];
+     }
+
+}
+if($_SERVER["REQUEST_METHOD"]=="POST"){
+    $param_driver = $_SESSION["reviewDriverId"];
+    $param_user = $_SESSION["serviceUserId"];
+    $param_driver = $_SESSION["reviewDriverId"];
+    $param_user = $_SESSION["reviewUserId"];
+    if(empty(trim($_POST["rating"]))){
+        $rating_error = "You must give a rating.";
     }
     else{
-        $confirmNewPassword = trim($_POST["confirmNewPassword"]);
+        $rating = trim($_POST["rating"]);
     }
-    if(empty($newPassword_error) && empty($confirmNewPassword_error) && empty($oldPassword_error)){
-        $result = mysqli_query($mysqli,"SELECT Password FROM Users Where Id ='$param_id'");
-        if(mysqli_num_rows($result)==1){
-            $hash_password = $row["Password"];
-            $oldPassword = hash("sha512",$oldPassword);
-            if(password_verify($oldPassword,$hash_password)){
-                $param_password = hash('sha512', $_POST["newPassword"]);
-                $param_password = password_hash($param_password, PASSWORD_DEFAULT);
-                $updatePassword = "UPDATE users SET Password = '$param_password' WHERE Id = '$param_id'";
-                if (mysqli_query($mysqli, $updatePassword)) {
-                    $updateConfirmPassword = "UPDATE users SET ConfirmPassword = '$param_password' WHERE Id = '$param_id'";
-                    if(mysqli_query($mysqli,$updateConfirmPassword)){
-                        //modal
-                    }
-                    else{
-                        header("location: error.php");
-                    }
-                }
-                else{
-                    header("location: error.php");
-                }
-            }
-            else{
-                $oldPassword_error="This password does not match your current password.";
-            }
+    $text = trim($_POST["text"]);
+    if(empty($rating_error)){
+        $param_id = uniqid();
+        $result = mysqli_query($mysqli,"INSERT INTO Reviews(Id, CustomerId, DriverId, Rating, Text, IsActive) values ('$param_id','$param_user','$param_driver',$rating,'$text',1);");
+        if($result){
+            //
         }
-        mysqli_stmt_close($stmt);
+        else{
+            header("location: error.php");
+        }
     }
-    header("location: userProfile.php?id="+$param_id);
 }
+
 mysqli_close($mysqli); ?>
-
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -343,8 +311,56 @@ mysqli_close($mysqli); ?>
                 left: 3%;
             }
         }
+        div.stars {
+            width: 270px;
+            display: inline-block;
+        }
+
+        .mt-200 {
+            margin-top: 200px;
+        }
+
+        input.star {
+            display: none;
+        }
+
+        label.star {
+            float: right;
+            padding: 10px;
+            font-size: 36px;
+            color: white;
+            transition: all .2s;
+        }
+
+        input.star:checked ~ label.star:before {
+            content: '\f005';
+            color: #FD4;
+            transition: all .25s;
+        }
+
+        input.star-5:checked ~ label.star:before {
+            color: #FE7;
+            text-shadow: 0 0 20px #952;
+        }
+
+        input.star-1:checked ~ label.star:before {
+            color: #F62;
+        }
+
+        label.star:hover {
+            transform: rotate(-15deg) scale(1.3);
+        }
+
+        label.star:before {
+            content: '\f006';
+            font-family: FontAwesome;
+        }
 <?php include 'CSS/authentication.css'; ?>
     </style>
+    <link rel="stylesheet" href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css' />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
 </head>
 <body>
     <ul class="navigation">
@@ -355,19 +371,19 @@ mysqli_close($mysqli); ?>
             <a href="userLayout.php?page=index">Home</a>
         </li>
         <li class="nav-item">
-            <?php echo '<a href="userProfile.php?id='.$param_id.'">Profile</a>';?>
+            <?php echo '<a href="userProfile.php?id='.$param_userid.'">Profile</a>';?>
         </li>
         <li class="nav-item">
-            <?php echo '<a href="pastServices.php?id='.$param_id.'&role='.$param_roleName.'">Past Services</a>';?>
+            <?php echo '<a href="pastServices.php?id='.$param_userid.'&role=User">Past Services</a>';?>
         </li>
         <li class="nav-item">
-            <?php echo '<a href="awaitingServices.php?id='.$param_id.'&role='.$param_roleName.'">Awaiting Services</a>';?>
+            <?php echo '<a href="awaitingServices.php?id='.$param_userid.'&role=User">Awaiting Services</a>';?>
         </li>
         <li class="nav-item">
-            <?php echo '<a href="yourReviews.php?id='.$param_id.'">Your reviews</a>';?>
+            <?php echo '<a href="yourReviews.php?id='.$param_userid.'">Your reviews</a>';?>
         </li>
         <li class="nav-item">
-            <?php echo '<a href="yourComplaints.php?id='.$param_id.'">Your complaints</a>';?>
+            <?php echo '<a href="yourComplaints.php?id='.$param_userid.'">Your complaints</a>';?>
         </li>
         <li class="nav-item">
             <?php echo '<a href="logout.php">Sign Out</a>';?>
@@ -375,48 +391,74 @@ mysqli_close($mysqli); ?>
         <img src="Images/circle_PNG62.png" id="blackCircle" />>
 
     </ul>
+
     <input type="checkbox" id="nav-trigger" class="nav-trigger" />
     <!--<label for="nav-trigger"></label>-->
 
     <div class="site-wrap">
         <header class="user__header">
             <img src="Images/logo2.png" height="150" />
-            <h1 class="user__title">These changes are permanent and cannot be reverted.</h1>
         </header>
-        <input type="hidden" id="userId" value="<?php $param_id?>" />
-        <form class="form" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
-
-            <div class="form__group" <?php echo(!empty($oldPassword_error))? 'has-error' : '' ?>>
-                <input type="password" placeholder="Old Password" class="form__input" name="oldPassword" id="oldPassword" />
-                <span class="help-block text-danger">
-                    <?php echo $oldPassword_error ?>
-                </span>
+        <div class="container d-flex justify-content-center mt-50">
+            
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="stars">
+                        <form action="">
+                            <input class="star star-5" id="star-5" type="radio" name="star" />
+                            <label class="star star-5" for="star-5"></label>
+                            <input class="star star-4" id="star-4" type="radio" name="star" />
+                            <label class="star star-4" for="star-4"></label>
+                            <input class="star star-3" id="star-3" type="radio" name="star" />
+                            <label class="star star-3" for="star-3"></label>
+                            <input class="star star-2" id="star-2" type="radio" name="star" />
+                            <label class="star star-2" for="star-2"></label>
+                            <input class="star star-1" id="star-1" type="radio" name="star" />
+                            <label class="star star-1" for="star-1"></label>
+                        </form>
+                    </div>
+                </div>
             </div>
-
-            <div class="form__group" <?php echo(!empty($newPassword_error))? 'has-error': ''?>>
-                <input type="password" placeholder="New Password" class="form__input" name="newPassword" id="newPassword" />
-                <span class="help-block text-danger">
-                    <?php echo $newPassword_error ?>
-                </span>
-            </div>
-
-            <div class="form__group" <?php echo(!empty($confirmNewPassword_error))? 'has-error': ''?>>
-                <input type="password" placeholder="Confirm New Password" class="form__input" name="confirmNewPassword" id="confirmNewPassword" />
-                <span class="help-block text-danger">
-                    <?php echo $confirmNewPassword_error ?>
-                </span>
-            </div>
-            <button class="btn" type="submit">Confirm</button>
-        </form>
-        <button class="btn btn-info" id="myBtn" onclick="goBack()" style="width: 48%; margin-left: 25%; margin-top: 1%;">
-            Cancel
-        </button>
         </div>
-    </body>
+        <form class="form" id="ratingForm" method="POST">
+           <input type="hidden" id="rating" name="rating" value="0" />
+            <div class="form__group">
+                <label for="text" class="text-white" style="font-size:larger;">Your Review for <?php echo $driverName ?></label>
+                <textarea class="form-control" rows="5" id="text" name="text"></textarea>
+            </div>
+            <div class="form__group">
+                <button type="submit" class="btn btn-golden mb-2 mt-2" id="saveReview">Save Review</button>
+                <button type="button" class="btn btn-golden" id="cancelReview" onclick="goBack()">Cancel</button>
+            </div>
+        </form>
+    </div>
+    <div class="modal fade" id="thankyouModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel">Success!</h4>
+                </div>
+                <div class="modal-body">
+                    <p>Your review was submitted successfully!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
 </html>
 <script>
     debugger
     function goBack() {
         window.history.back();
     }
+</script>
+
+<script>
+    $('input.star').click(function () {
+        debugger;
+        var getAllChecked = $(this).attr('class');
+        var lastChar = getAllChecked.substr(getAllChecked.length - 1);
+        var getRatingHidden = $("#rating").val(parseInt(lastChar));
+        });
 </script>

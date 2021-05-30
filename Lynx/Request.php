@@ -17,6 +17,12 @@ class Request
     public $isAccepted;
     public $isSeen;
     public $requestedById;
+    public $driverFullName;
+    public $customerFullName;
+    public $driverUserName;
+    public $customerUserName;
+    public $address;
+    public $destination;
 
     function set_requestedById($requestedById){
         $this->requestedById = $requestedById;
@@ -52,12 +58,58 @@ class Request
         $this->isAccepted = $isAccepted;
     }
     function get_isAccepted(){
-        return $this->isAccepted;
+        if($this->isAccepted == 1){
+            return "Yes";
+        }
+        else{
+            return "No";
+        }
     }
     function set_isSeen($isSeen){
         $this->isSeen = $isSeen;
     }
     function get_isSeen(){
-        return $this->isSeen;
+        if($this->isSeen == 1){
+            return "Yes";
+        }
+        else{
+            return "No";
+        }
+    }
+    function set_driverFullName($fullname){
+        $this->driverFullName = $fullname;
+    }
+    function get_driverFullName(){
+        return $this->driverFullName;
+    }
+    function set_customerFullName($fullname){
+        $this->customerFullName = $fullname;
+    }
+    function get_customerFullName(){
+        return $this->customerFullName;
+    }
+    function set_customerUserName($username){
+        $this->customerUserName = $username;
+    }
+    function get_customerUserName(){
+        return $this->customerUserName;
+    }
+    function set_driverUserName($username){
+        $this->driverUserName = $username;
+    }
+    function get_driverUserName(){
+        return $this->driverUserName;
+    }
+    function set_address($address){
+        $this->address = $address;
+    }
+    function get_address(){
+        return $this->address;
+    }
+    function set_destination($destination){
+        $this->destination = $destination;
+    }
+    function get_destination(){
+        return $this->destination;
     }
 }

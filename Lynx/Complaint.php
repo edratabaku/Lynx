@@ -11,47 +11,53 @@
 class Complaint
 {
     public $id;
-    public $driverId;
-    public $customerId;
-    public $driverName;
-    public $customerName;
+    public $subjectId;
+    public $writerId;
+    public $subjectName;
+    public $writerName;
     public $text;
-
+    public $isActive;
     function set_id($id){
         $this->id = $id;
     }
     function get_id(){
         return $this->id;
     }
-    function set_driverId($id){
-        $this->driverId;
+    function set_subjectId($id){
+        $this->subjectId = $id;
     }
-    function get_driverId(){
-        return $this->driverId;
+    function get_subjectId(){
+        return $this->subjectId;
     }
-    function set_customerId($id){
-        $this->customerId;
+    function set_writerId($id){
+        $this->writerId = $id;
     }
-    function get_customerId(){
-        return $this->customerId;
+    function get_writerId(){
+        return $this->writerId;
     }
-    function set_driverName($name){
-        $this->driverName;
+    function set_writerName($name){
+        $this->writerName = $name;
     }
-    function get_driverName(){
-        return $this->driverName;
+    function get_writerName(){
+        return $this->writerName;
     }
-    function set_customerName($name){
-        $this->customerName;
+    function set_subjectName($name){
+        $this->subjectName = $name;
     }
-    function get_customerName(){
-        return $this->customerName;
-    
+    function get_subjectName(){
+        return $this->subjectName;
+
     }
     function set_text($text){
         $this->text = $text;
     }
     function get_text(){
         return $this->text;
+    }
+    function set_isActive($isActive){
+        $this->isActive = $isActive;
+    }
+    function get_isActive(){
+        return $this->isActive;
     }
 }

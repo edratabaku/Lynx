@@ -1,6 +1,7 @@
 <?php
 include("layout.php");
 session_start();
+$param_roleName=$_SESSION["Role"];
 // Check existence of id parameter before processing further
 if(isset($_GET["id"]) && !empty(trim($_GET["id"]))){
     // Include config file
@@ -355,8 +356,7 @@ if(isset($_GET["id"]) && !empty(trim($_GET["id"]))){
 
     </style>
 </head>
-<body>
-    <ul class="navigation">
+ <ul class="navigation">
         <li class="item">
             <img src="Images/logo2.png" height="150" />
         </li>
@@ -364,23 +364,26 @@ if(isset($_GET["id"]) && !empty(trim($_GET["id"]))){
             <a href="userLayout.php?page=index">Home</a>
         </li>
         <li class="nav-item">
-            <?php echo '<a href="userProfile.php?id='.$Id.'">Profile</a>';?>
+            <?php echo '<a href="userProfile.php?id='.$param_id.'">Profile</a>';?>
         </li>
         <li class="nav-item">
-            <a href="#">Past Services</a>
+            <?php echo '<a href="pastServices.php?id='.$param_id.'&role='.$param_roleName.'">Past Services</a>';?>
         </li>
         <li class="nav-item">
-            <a href="#">Awaiting Services</a>
+            <?php echo '<a href="awaitingServices.php?id='.$param_id.'&role='.$param_roleName.'">Awaiting Services</a>';?>
         </li>
         <li class="nav-item">
-            <a href="#">Your reviews</a>
+            <?php echo '<a href="yourReviews.php?id='.$param_id.'">Your reviews</a>';?>
         </li>
         <li class="nav-item">
-            <a href="#">Your complaints</a>
+            <?php echo '<a href="yourComplaints.php?id='.$param_id.'">Your complaints</a>';?>
         </li>
-<img src="Images/circle_PNG62.png" id="blackCircle"/>
-    </ul>
+      <li class="nav-item">
+            <?php echo '<a href="logout.php">Sign Out</a>';?>
+        </li>
+        <img src="Images/circle_PNG62.png" id="blackCircle" />>
 
+    </ul>
     <input type="checkbox" id="nav-trigger" class="nav-trigger" />
     <!--<label for="nav-trigger"></label>-->
 

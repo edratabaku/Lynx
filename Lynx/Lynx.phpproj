@@ -20,13 +20,17 @@
     <IncludeDebugInformation>false</IncludeDebugInformation>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="addComplaint.php" />
+    <Compile Include="addReview.php" />
     <Compile Include="addService.php" />
     <Compile Include="Administration\adminConfig.php" />
     <Compile Include="Administration\adminlayout.php" />
     <Compile Include="Administration\roles.php" />
+    <Compile Include="awaitingServices.php" />
     <Compile Include="changeFormType.php" />
     <Compile Include="Comment.php" />
     <Compile Include="Complaint.php" />
+    <Compile Include="complaintForm.php" />
     <Compile Include="configuration.php" />
     <Compile Include="deleteAccount.php" />
     <Compile Include="Driver.php" />
@@ -38,6 +42,8 @@
     <Compile Include="pastServices.php" />
     <Compile Include="Request.php" />
     <Compile Include="requireService.php" />
+    <Compile Include="Review.php" />
+    <Compile Include="reviewForm.php" />
     <Compile Include="send_email.php" />
     <Compile Include="sorryToSeeYouGo.php" />
     <Compile Include="userProfile.php" />
@@ -51,6 +57,8 @@
     <Compile Include="filterDrivers.php" />
     <Compile Include="verify_email.php" />
     <Compile Include="Views\layout.php" />
+    <Compile Include="yourComplaints.php" />
+    <Compile Include="yourReviews.php" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="CSS\" />
@@ -60,6 +68,7 @@
     <Folder Include="Views\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="complaint.js" />
     <Content Include="CSS\admin.css" />
     <Content Include="CSS\register.css" />
     <Content Include="CSS\authentication.css" />
@@ -71,10 +80,12 @@
     <Content Include="Images\black-and-gold.jpg" />
     <Content Include="Images\by1.jpg" />
     <Content Include="Images\circle_PNG62.png" />
+    <Content Include="Images\gold3.png" />
     <Content Include="Images\logo2.png" />
     <Content Include="Images\logo_lynx.png" />
     <Content Include="Images\oie_transparent %281%29.png" />
     <Content Include="Images\oie_transparent.png" />
+    <Content Include="Images\png3.png" />
     <Content Include="Images\uploadImage.jpg" />
     <Content Include="Images\wcgoldbg.png" />
     <Content Include="Images\wp10.jpg" />
@@ -85,5 +96,6 @@
     <Content Include="Images\wp6.jpg" />
     <Content Include="Images\wp7.jpg" />
     <Content Include="Images\wp9.jpg" />
+    <Content Include="rating.js" />
   </ItemGroup>
 </Project>

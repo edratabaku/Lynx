@@ -1,3 +1,11 @@
+<?php
+session_start();
+if($_SERVER["REQUEST_METHOD"] == "GET"){
+    $param_id = $_SESSION["Id"];
+    $param_role = $_GET["role"];
+}
+
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -234,6 +242,7 @@
             top: -24%;
         }
 
+
         #returnHome {
             color: rgb(146 199 255);
         }
@@ -263,31 +272,75 @@
                 left: 3%;
             }
         }
+        .table {
+            width: 100%;
+            max-width: 100%;
+            margin-bottom: 1rem;
+            background-color: transparent;
+        }
+
+        * {
+            outline: none;
+        }
+
+        .table th,
+        .table thead th {
+            font-weight: 500;
+        }
+
+        .table thead th {
+            vertical-align: bottom;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .table th {
+            padding: 1rem;
+            vertical-align: top;
+            border-top: 1px solid #dee2e6;
+        }
+
+        th {
+            text-align: inherit;
+        }
+
+        .m-b-20 {
+            margin-bottom: 20px;
+        }
+        .table-light tbody + tbody, .table-light td, .table-light th, .table-light thead th {
+            background-color: #e9ecef;
+            border-color: #dee2e6;
+        }
 <?php include 'CSS/authentication.css'; ?>
     </style>
 </head>
 <body>
     <ul class="navigation">
-        <li class="item">Administration</li>
-        <li class="nav-item">
-            <a href="#">Home</a>
+        <li class="item">
+            <img src="Images/logo2.png" height="150" />
         </li>
         <li class="nav-item">
-            <?php echo '<a href="userProfile.php?id='.$Id.'">Profile</a>';?>
+            <a href="userLayout.php?page=index">Home</a>
         </li>
         <li class="nav-item">
-            <a href="#">Drivers</a>
+            <?php echo '<a href="userProfile.php?id='.$param_id.'">Profile</a>';?>
         </li>
         <li class="nav-item">
-            <a href="#">Supervisors</a>
+            <?php echo '<a href="pastServices.php?id='.$param_id.'&role='.$_GET["role"].'">Past Services</a>';?>
         </li>
         <li class="nav-item">
-            <a href="#">Managers</a>
+            <?php echo '<a href="awaitingServices.php?id='.$param_id.'&role='.$_GET["role"].'">Awaiting Services</a>';?>
         </li>
         <li class="nav-item">
-            <a href="#">New requests</a>
+            <?php echo '<a href="yourReviews.php?id='.$param_id.'">Your reviews</a>';?>
         </li>
-        <img src="Images/circle_PNG62.png" id="blackCircle" />
+        <li class="nav-item">
+            <?php echo '<a href="yourComplaints.php?id='.$param_id.'">Your complaints</a>';?>
+        </li>
+        <li class="nav-item">
+            <?php echo '<a href="logout.php">Sign Out</a>';?>
+        </li>
+        <img src="Images/circle_PNG62.png" id="blackCircle" />>
+
     </ul>
 
     <input type="checkbox" id="nav-trigger" class="nav-trigger" />
@@ -295,19 +348,34 @@
 
     <div class="site-wrap">
         <?php
-include("layout.php");
+ include("layout.php");
 session_start();
+require_once "Request.php";
 $requests = array();
 // Check existence of id parameter before processing further
 if(isset($_GET["id"]) && !empty(trim($_GET["id"]))){
     // Include config file
     require_once "configuration.php";
     $param_id = trim($_GET["id"]);
-if($_SESSION["Role"] == "User"){
-    $query = "select * from lynx.requests as r
+if($_GET["role"] == "User"){
+    $query = "select r.DriverId as DriverId,
+                u.FirstName as FirstName,
+                u.LastName as LastName,
+                r.RequestedById as RequestedById,
+                r.IsAccepted as IsAccepted,
+                r.IsSeen as IsSeen,
+                r.TimeOfRequest as TimeOfRequest,
+                du.FirstName as DriverFirstName,
+                du.LastName as DriverLastName,
+                du.UserName as DriverUserName,
+                u.UserName as CustomerUserName,
+                r.Address as Address,
+                r.Destination as Destination
+                from lynx.requests as r
                 inner join lynx.users as u on u.Id = r.RequestedById
                 inner join lynx.drivers as d on d.Id = r.DriverId
-                where r.timeofrequest > DATE_ADD(CURDATE(), INTERVAL 1 DAY) and r.RequestedById = ?";
+                inner join lynx.users as du on d.UserId = du.Id
+                where r.timeofrequest < DATE_ADD(CURDATE(), INTERVAL 1 DAY) and r.RequestedById = ?";
     if($stmt = mysqli_prepare($mysqli, $query)){
         mysqli_stmt_bind_param($stmt,"s",$param_id);
         if(mysqli_stmt_execute($stmt)){
@@ -322,22 +390,26 @@ if($_SESSION["Role"] == "User"){
                     $request->set_isAccepted($r["IsAccepted"]);
                     $request->set_isSeen($r["IsSeen"]);
                     $request->set_timeOfRequest($r["TimeOfRequest"]);
+                    $request->set_driverFullName($r["DriverFirstName"]." ".$r["DriverLastName"]);
+                    $request->set_driverUserName($r["DriverUserName"]);
+                    $request->set_customerFullName($r["FirstName"]." ".$r["LastName"]);
+                    $request->set_customerUserName($r["CustomerUserName"]);
+                    $request->set_address($r["Address"]);
+                    $request->set_destination($r["Destination"]);
                     array_push($requests,$request);
                 }
                 echo "<div class='content'>";
  echo "<div class='container'>";
- echo "<table class='table'>
+ echo "<table class='table table-light'>
                         <thead class='thead-light'>
-                            <tr>
-                                <th> <label class=customcheckbox m-b-20'> <input type='checkbox' id='mainCheckbox'> <span class='checkmark'></span> </label> </th>
-                                <th scope='col'>Driver</th>
+                            <tr>                                <th scope='col'>Driver</th>
                                 <th scope='col'>Time of Service</th>
                                 <th scope='col'>Address</th>
                                 <th scope='col'>Destination</th>
-<th scope='col'><button class='btn btn-success'>Write Review</button></th>
-<th scope = 'col'><button class='btn btn-danger'>Write Complaint</button></th>
+<th scope='col'></th>
+<th scope = 'col'></th>
 </tr>
-                        </thead> <tbody class='customtable'>";
+                        </thead> <tbody class=''>";
             }
             else{
                 echo "<h3 class='text-danger'>No data.</h3>";
@@ -347,11 +419,11 @@ if($_SESSION["Role"] == "User"){
 
     mysqli_stmt_close($stmt);
 }
-else if ($_SESSION["Role"] == "Driver"){
+else if ($_GET["role"] == "Driver"){
     $query = "select * from lynx.requests as r
                 inner join lynx.users as u on u.Id = r.RequestedById
                 inner join lynx.users as d on d.Id = r.DriverId
-                where r.timeofrequest > DATE_ADD(CURDATE(), INTERVAL 1 DAY) and r.DriverId ='$param_id'";
+                where r.timeofrequest < DATE_ADD(CURDATE(), INTERVAL 1 DAY) and r.DriverId ='$param_id'";
     if($stmt = mysqli_prepare($mysqli, $query)){
         mysqli_stmt_bind_param($stmt,"s",$id);
         if(mysqli_stmt_execute($stmt)){
@@ -365,41 +437,44 @@ else if ($_SESSION["Role"] == "Driver"){
                     $request->set_requestedById($r["RequestedById"]);
                     $request->set_isAccepted($r["IsAccepted"]);
                     $request->set_isSeen($r["IsSeen"]);
+                    $request->set_address($r["Address"]);
+                    $request->set_destination($r["Destination"]);
                     $request->set_timeOfRequest($r["TimeOfRequest"]);
                     array_push($requests,$request);
                 }
                  echo "<div class='content'>";
  echo "<div class='container'>";
- echo "<table class='table'>
+ echo "<table class='table table-light'>
                         <thead class='thead-light'>
                             <tr>
-                                <th> <label class=customcheckbox m-b-20'> <input type='checkbox' id='mainCheckbox'> <span class='checkmark'></span> </label> </th>
-                                <th scope='col'>Driver</th>
+                                <th scope='col'>Driver Name</th>
                                 <th scope='col'>Time of Service</th>
                                 <th scope='col'>Address</th>
                                 <th scope='col'>Destination</th>
-<th scope='col'><button class='btn btn-success'>Write Review</button></th>
-<th scope = 'col'><button class='btn btn-danger'>Write Complaint</button></th>
+<th></th><th></th>
 </tr>
-                        </thead> <tbody class='customtable'>";
+                        </thead> <tbody class=''>";
             }
             else{
                 echo "<h3 class='text-danger'>No data.</h3>";
             }
-            
+
         }
     }
     mysqli_stmt_close($stmt);
 }
 mysqli_stmt_close($mysqli);}
 
-for($counter = 0; $counter<count($drivers);$counter++){
-//echo"
-//<tr>
-//<td>".$requests[$counter]->get_
-
-//</div>
-//</div>";
+for($counter = 0; $counter<count($requests);$counter++){
+    echo"<tr>";
+    echo"<td scope='col'>".$requests[$counter]->get_driverFullName()."</td>";
+    echo"<td scope='col'>".$requests[$counter]->get_timeOfRequest()."</td>";
+    echo"<td scope='col'>".$requests[$counter]->get_address()."</td>";
+    echo"<td scope='col'>".$requests[$counter]->get_destination()."</td>";
+    echo"<th scope='col'><a class='btn btn-success' href='reviewForm.php?id=".$requests[$counter]->get_requestedById()."&driverId=".$requests[$counter]->get_driverId()."'>Write Review</a></th>
+<th scope = 'col'><a class='btn btn-success' href='complaintForm.php?writerId=".$requests[$counter]->get_requestedById()."&subjectId=".$requests[$counter]->get_driverId()."'>Write Complaint</a></th>";
+    echo"</tr>";
+}
 
         ?>
 

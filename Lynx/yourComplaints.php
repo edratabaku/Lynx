@@ -1,89 +1,16 @@
 <?php
 session_start();
-require_once "configuration.php";
-$oldPassword_error=$newPassword_error=$confirmNewPassword_error="";
-if(isset($_GET["id"])&& !empty(trim($_GET["id"]))){
-    $param_id = trim($_GET["id"]);
-    $result = mysqli_query($mysqli,"SELECT Password,r.Name as RoleName FROM USERS INNER JOIN Roles AS R ON RoleId = R.Id WHERE Id='$param_id'");
-    if(mysqli_num_rows($result)==1){
-        $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
-        $param_oldPassword = $row["Password"];
-        $param_roleName = $row["RoleName"];
-    }
-}
-else{
-    $param_id = $_SESSION["Id"];
-    $result = mysqli_query($mysqli,"SELECT Password,r.Name as RoleName FROM USERS INNER JOIN Roles AS R ON RoleId = R.Id WHERE Id='$param_id'");
-    if(mysqli_num_rows($result)==1){
-        $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
-        $param_oldPassword = $row["Password"];
-        $param_roleName = $row["RoleName"];
-    }
-}
-if($_SERVER["REQUEST_METHOD"] == "POST"){
-    if(empty(trim($_POST["oldPassword"]))){
-        $oldPassword_error = "You must enter your old password.";
-    } else{
-        $oldPassword = trim($_POST["oldPassword"]);
-    }
-    if(empty(trim($_POST["newPassword"]))){
-        $newPassword_error = "You must enter your new password.";
-    }
-    else if(strlen(trim($_POST["newPassword"]))<8){
-        $newPassword_error = "Your password must contain at least 8 characters.";
-    }
-    else{
-        $newPassword = trim($_POST["newPassword"]);
-    }
-    if(empty(trim($_POST["confirmNewPassword"]))){
-        $confirmNewPassword_error = "You must confirm your new password.";
-    }
-    else if(strcmp($_POST["confirmNewPassword"],$_POST["newPassword"]) != 0){
-        $confirmPassword_error = "Your new password and confirm password do not match.";
-    }
-    else{
-        $confirmNewPassword = trim($_POST["confirmNewPassword"]);
-    }
-    if(empty($newPassword_error) && empty($confirmNewPassword_error) && empty($oldPassword_error)){
-        $result = mysqli_query($mysqli,"SELECT Password FROM Users Where Id ='$param_id'");
-        if(mysqli_num_rows($result)==1){
-            $hash_password = $row["Password"];
-            $oldPassword = hash("sha512",$oldPassword);
-            if(password_verify($oldPassword,$hash_password)){
-                $param_password = hash('sha512', $_POST["newPassword"]);
-                $param_password = password_hash($param_password, PASSWORD_DEFAULT);
-                $updatePassword = "UPDATE users SET Password = '$param_password' WHERE Id = '$param_id'";
-                if (mysqli_query($mysqli, $updatePassword)) {
-                    $updateConfirmPassword = "UPDATE users SET ConfirmPassword = '$param_password' WHERE Id = '$param_id'";
-                    if(mysqli_query($mysqli,$updateConfirmPassword)){
-                        //modal
-                    }
-                    else{
-                        header("location: error.php");
-                    }
-                }
-                else{
-                    header("location: error.php");
-                }
-            }
-            else{
-                $oldPassword_error="This password does not match your current password.";
-            }
-        }
-        mysqli_stmt_close($stmt);
-    }
-    header("location: userProfile.php?id="+$param_id);
-}
-mysqli_close($mysqli); ?>
-
-
-
+$id = $_SESSION["Id"];
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
     <title>View Record</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+    <link rel="stylesheet" href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css' />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
     <style>
         body {
             background: #333333;
@@ -251,6 +178,7 @@ mysqli_close($mysqli); ?>
             padding: 4em 1rem 5rem 4rem;
             background-size: 200%;
             color: #ffffffb3;
+            overflow:auto;
         }
 
         /* Nav Trigger */
@@ -314,6 +242,7 @@ mysqli_close($mysqli); ?>
             top: -24%;
         }
 
+
         #returnHome {
             color: rgb(146 199 255);
         }
@@ -343,6 +272,74 @@ mysqli_close($mysqli); ?>
                 left: 3%;
             }
         }
+        .table {
+            width: 100%;
+            max-width: 100%;
+            margin-bottom: 1rem;
+            background-color: transparent;
+        }
+
+        * {
+            outline: none;
+        }
+
+        .table th,
+        .table thead th {
+            font-weight: 500;
+        }
+
+        .table thead th {
+            vertical-align: bottom;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .table th {
+            padding: 1rem;
+            vertical-align: top;
+            border-top: 1px solid #dee2e6;
+        }
+
+        th {
+            text-align: inherit;
+        }
+
+        .m-b-20 {
+            margin-bottom: 20px;
+        }
+        .table-light tbody + tbody, .table-light td, .table-light th, .table-light thead th {
+            background-color: #e9ecef;
+            border-color: #dee2e6;
+        }
+        .rating-css {
+            width: 300px;
+        }
+
+            .rating-css div {
+                color: #ffe400;
+                font-size: 30px;
+                font-family: sans-serif;
+                font-weight: 800;
+                text-align: center;
+                text-transform: uppercase;
+            }
+
+            .rating-css input {
+                display: none;
+            }
+
+                .rating-css input + label {
+
+
+                }
+
+                .rating-css input:checked + label ~ label {
+                    color: #838383;
+                }
+
+            .rating-css label:active {
+                transform: scale(0.8);
+                transition: 0.3s ease;
+            }
 <?php include 'CSS/authentication.css'; ?>
     </style>
 </head>
@@ -355,19 +352,19 @@ mysqli_close($mysqli); ?>
             <a href="userLayout.php?page=index">Home</a>
         </li>
         <li class="nav-item">
-            <?php echo '<a href="userProfile.php?id='.$param_id.'">Profile</a>';?>
+            <?php echo '<a href="userProfile.php?id='.$id.'">Profile</a>';?>
         </li>
         <li class="nav-item">
-            <?php echo '<a href="pastServices.php?id='.$param_id.'&role='.$param_roleName.'">Past Services</a>';?>
+            <?php echo '<a href="pastServices.php?id='.$id.'&role=User">Past Services</a>';?>
         </li>
         <li class="nav-item">
-            <?php echo '<a href="awaitingServices.php?id='.$param_id.'&role='.$param_roleName.'">Awaiting Services</a>';?>
+            <?php echo '<a href="awaitingServices.php?id='.$id.'&role=User">Awaiting Services</a>';?>
         </li>
         <li class="nav-item">
-            <?php echo '<a href="yourReviews.php?id='.$param_id.'">Your reviews</a>';?>
+            <?php echo '<a href="yourReviews.php?id='.$id.'">Your reviews</a>';?>
         </li>
         <li class="nav-item">
-            <?php echo '<a href="yourComplaints.php?id='.$param_id.'">Your complaints</a>';?>
+            <?php echo '<a href="yourComplaints.php?id='.$id.'">Your complaints</a>';?>
         </li>
         <li class="nav-item">
             <?php echo '<a href="logout.php">Sign Out</a>';?>
@@ -375,48 +372,142 @@ mysqli_close($mysqli); ?>
         <img src="Images/circle_PNG62.png" id="blackCircle" />>
 
     </ul>
+
     <input type="checkbox" id="nav-trigger" class="nav-trigger" />
     <!--<label for="nav-trigger"></label>-->
 
     <div class="site-wrap">
-        <header class="user__header">
-            <img src="Images/logo2.png" height="150" />
-            <h1 class="user__title">These changes are permanent and cannot be reverted.</h1>
-        </header>
-        <input type="hidden" id="userId" value="<?php $param_id?>" />
-        <form class="form" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
-
-            <div class="form__group" <?php echo(!empty($oldPassword_error))? 'has-error' : '' ?>>
-                <input type="password" placeholder="Old Password" class="form__input" name="oldPassword" id="oldPassword" />
-                <span class="help-block text-danger">
-                    <?php echo $oldPassword_error ?>
-                </span>
-            </div>
-
-            <div class="form__group" <?php echo(!empty($newPassword_error))? 'has-error': ''?>>
-                <input type="password" placeholder="New Password" class="form__input" name="newPassword" id="newPassword" />
-                <span class="help-block text-danger">
-                    <?php echo $newPassword_error ?>
-                </span>
-            </div>
-
-            <div class="form__group" <?php echo(!empty($confirmNewPassword_error))? 'has-error': ''?>>
-                <input type="password" placeholder="Confirm New Password" class="form__input" name="confirmNewPassword" id="confirmNewPassword" />
-                <span class="help-block text-danger">
-                    <?php echo $confirmNewPassword_error ?>
-                </span>
-            </div>
-            <button class="btn" type="submit">Confirm</button>
-        </form>
-        <button class="btn btn-info" id="myBtn" onclick="goBack()" style="width: 48%; margin-left: 25%; margin-top: 1%;">
-            Cancel
-        </button>
-        </div>
-    </body>
-</html>
-<script>
-    debugger
-    function goBack() {
-        window.history.back();
+        <?php
+ require_once "configuration.php";
+require_once "Complaint.php";
+$name = $_REQUEST["name"];
+$id = $_GET["id"];
+$complaints = array();
+$query="";
+if($name == null){
+    $query = "select c.Id as Id,
+                    w.Id as WriterId,
+                    w.FirstName as WriterFirstName,
+                    w.LastName as WriterLastName,
+                    s.FirstName as SubjectFirstName,
+                    s.LastName as SubjectLastName,
+                    s.Id as SubjectId,
+                    c.Text as Text,
+                    c.IsActive as IsActive from complaints as c
+                    inner join Users as w on c.WriterId = w.Id
+                    inner join Users as s on c.SubjectId = s.Id
+                    where c.IsActive = 1 and WriterId='$id'";
+    if($stmt = mysqli_prepare($mysqli, $query)){
+        if(mysqli_stmt_execute($stmt)){
+            $result = mysqli_stmt_get_result($stmt);
+            if(mysqli_num_rows($result)>0){
+                foreach ($result as $r){
+                    $complaint = new Complaint();
+                    $complaint->set_id($r["Id"]);
+                    $complaint->set_isActive($r["IsActive"]);
+                    $complaint->set_subjectId($r["SubjectId"]);
+                    $subjectName = $r["SubjectFirstName"]." ".$r["SubjectLastName"];
+                    $complaint->set_subjectName($subjectName);
+                    $complaint->set_text($r["Text"]);
+                    $complaint->set_writerId($r["WriterId"]);
+                    $writerName = $r["WriterFirstName"]." ".$r["WriterLastNAme"];
+                    $complaint->set_writerName($writerName);
+                    array_push($complaints,$complaint);
+                }
+            }
+        }
     }
-</script>
+    mysqli_stmt_close($stmt);
+}
+else {
+    $query = "select c.Id as Id,
+                    w.Id as WriterId,
+                    w.FirstName as WriterFirstName,
+                    w.LastName as WriterLastName,
+                    s.FirstName as SubjectFirstName,
+                    s.LastName as SubjectLastName,
+                    s.Id as SubjectId,
+                    c.Text as Text,
+                    c.IsActive as IsActive from complaints as c
+                    inner join Users as w on c.WriterId = w.Id
+                    inner join Users as s on c.SubjectId = s.Id
+                    where c.IsActive = 1 and WriterId='$id' and (SubjectFirstName='$name' OR SubjectLastName='$name')";
+    if($stmt = mysqli_prepare($mysqli, $query)){
+        if(mysqli_stmt_execute($stmt)){
+            $result = mysqli_stmt_get_result($stmt);
+            if(mysqli_num_rows($result)>0){
+                foreach ($result as $r){
+                    $complaint = new Complaint();
+                    $complaint->set_id($r["Id"]);
+                    $complaint->set_isActive($r["IsActive"]);
+                    $complaint->set_subjectId($r["SubjectId"]);
+                    $subjectName = $r["SubjectFirstName"]." ".$r["SubjectLastName"];
+                    $complaint->set_subjectName($subjectName);
+                    $complaint->set_text($r["Text"]);
+                    $complaint->set_writerId($r["WriterId"]);
+                    $writerName = $r["WriterFirstName"]." ".$r["WriterLastNAme"];
+                    $complaint->set_writerName($writerName);
+                    array_push($complaints,$complaint);
+                }
+            }
+        }
+    }
+    mysqli_stmt_close($stmt);
+}
+echo "<div class='content'>";
+echo "<div class='container'>";
+for($counter = 0; $counter<count($complaints);$counter++){
+    //echo"<div class='row'>";
+    if($counter==0){
+        echo "<div class='row'>";
+    }
+    else if($counter%3==0){
+        echo "</div>";
+        echo "<div class='row'>";
+    }
+
+    echo"
+<div class='col-lg-4 col-xl-4 col-md-4 col-sm-12'>
+    <div class='text-center card-box'>
+        <div class='member-card pt-2 pb-2'>
+            <div class='thumb-lg member-thumb mx-auto'>";
+    echo"
+            </div>
+        <div>
+        <h4>".$complaints[$counter]->get_subjectName()."</h4>
+    </div>
+
+    <div class='mt-4'>
+        <div class='row'>
+            <div class='col-md-12'>".$complaints[$counter]->get_text()."
+</div>
+        </div>
+   </div>
+</div>
+
+<div>
+
+
+
+
+
+
+
+</div>
+
+
+
+</div>
+</div>";
+    if ($counter == count($complaints)-1 && $counter%3!=0){
+        echo "</div>";
+    }
+}
+echo "</div>
+</div>
+";
+mysqli_stmt_close($mysqli);
+        ?>
+    </div>
+</body>
+</html>

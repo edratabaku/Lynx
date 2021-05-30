@@ -29,7 +29,7 @@ if($_SERVER["REQUEST_METHOD"]=="POST"){
     if(empty($date_error) && empty($time_error) && empty($address_error) && empty($destination_error)){
         $param_id = uniqid();
         $service_time = date('Y-m-d h:i:s',strtotime($_POST['date'].' '.$_POST['time']));
-        $result = mysqli_query($mysqli,"INSERT INTO Requests(Id, RequestedById, DriverId, TimeOfRequest, IsAccepted, IsSeen) values ('$param_id','$param_user','$param_driver','$service_time',0,0);");
+        $result = mysqli_query($mysqli,"INSERT INTO Requests(Id, RequestedById, DriverId, TimeOfRequest, IsAccepted, IsSeen, Address, Destination) values ('$param_id','$param_user','$param_driver','$service_time',0,0,'$address','$destination');");
         if($result){
 
         }

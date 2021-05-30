@@ -327,26 +327,32 @@ mysqli_close($mysqli); ?>
 </head>
 <body>
     <ul class="navigation">
-        <li class="item">Administration</li>
-        <li class="nav-item">
-            <a href="#">Home</a>
+        <li class="item">
+            <img src="Images/logo2.png" height="150" />
         </li>
         <li class="nav-item">
-            <?php echo '<a href="userProfile.php?id='.$Id.'">Profile</a>';?>
+            <a href="userLayout.php?page=index">Home</a>
         </li>
         <li class="nav-item">
-            <a href="#">Drivers</a>
+            <?php echo '<a href="userProfile.php?id='.$param_userid.'">Profile</a>';?>
         </li>
         <li class="nav-item">
-            <a href="#">Supervisors</a>
+            <?php echo '<a href="pastServices.php?id='.$param_userid.'&role=User">Past Services</a>';?>
         </li>
         <li class="nav-item">
-            <a href="#">Managers</a>
+            <?php echo '<a href="awaitingServices.php?id='.$param_userid.'&role=User">Awaiting Services</a>';?>
         </li>
         <li class="nav-item">
-            <a href="#">New requests</a>
+            <?php echo '<a href="yourReviews.php?id='.$param_userid.'">Your reviews</a>';?>
         </li>
-        <img src="Images/circle_PNG62.png" id="blackCircle" />
+        <li class="nav-item">
+            <?php echo '<a href="yourComplaints.php?id='.$param_userid.'">Your complaints</a>';?>
+        </li>
+        <li class="nav-item">
+            <?php echo '<a href="logout.php">Sign Out</a>';?>
+        </li>
+        <img src="Images/circle_PNG62.png" id="blackCircle" />>
+
     </ul>
 
     <input type="checkbox" id="nav-trigger" class="nav-trigger" />
@@ -360,28 +366,28 @@ mysqli_close($mysqli); ?>
         <!--<input type="hidden" id="id" name="id" value="<?php $param_userid?>" />
         <input type="hidden" id="driverId" name="driverId" value="<?php $param_driverId?>" />-->
         <form class="form" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
-
+            <label class="text-white">Date of Service</label>
             <div class="form__group" <?php echo(!empty($date_error))? 'has-error' : '' ?>>
                 <input type="date" placeholder="Date" class="form__input" name="date" id="date" />
                 <span class="help-block text-danger">
                     <?php echo $date_error ?>
                 </span>
             </div>
-
+            <label class="text-white">Time of Service</label>
             <div class="form__group" <?php echo(!empty($time_error))? 'has-error': ''?>>
                 <input type="time" placeholder="Time" class="form__input" name="time" id="time" />
                 <span class="help-block text-danger">
                     <?php echo $time_error ?>
                 </span>
             </div>
-
+            <label class="text-white">Start Location</label>
             <div class="form__group" <?php echo(!empty($confirmNewPassword_error))? 'has-error': ''?>>
                 <input type="text" placeholder="Address" class="form__input" name="address" id="address" />
                 <span class="help-block text-danger">
                     <?php echo $address_error ?>
                 </span>
             </div>
-
+            <label class="text-white">Destination</label>
             <div class="form__group" <?php echo(!empty($destination_error))? 'has-error': ''?>>
                 <input type="text" placeholder="Destination" class="form__input" name="destination" id="destination" />
                 <span class="help-block text-danger">
@@ -390,7 +396,7 @@ mysqli_close($mysqli); ?>
             </div>
             <button class="btn" type="submit">Confirm</button>
         </form>
-        <button class="btn btn-info" id="myBtn" onclick="goBack()">Cancel</button>
+        <button class="btn btn-info" id="myBtn" onclick="goBack()" style="width: 48%; margin-left: 25%; margin-top: 1%;">Cancel</button>
     </div>
     <div class="modal fade" id="thankyouModal" tabindex="-1" role="dialog">
         <div class="modal-dialog">

@@ -4,7 +4,7 @@ session_start();
 // Nese perdoruesi ka dhene kredencialet drejtoje te home
 if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] == true){
     if(isset($_SESSION["Role"]) && $_SESSION["Role"]=="User"){
-        header("location: index.php");
+        header("location: userLayout.php?page=index");
         exit;
     }
     else if(isset($_SESSION["Role"]) && $_SESSION["Role"]=="Driver"){

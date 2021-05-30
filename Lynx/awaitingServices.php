@@ -1,82 +1,8 @@
 <?php
 session_start();
-require_once "configuration.php";
-$oldPassword_error=$newPassword_error=$confirmNewPassword_error="";
-if(isset($_GET["id"])&& !empty(trim($_GET["id"]))){
-    $param_id = trim($_GET["id"]);
-    $result = mysqli_query($mysqli,"SELECT Password,r.Name as RoleName FROM USERS INNER JOIN Roles AS R ON RoleId = R.Id WHERE Id='$param_id'");
-    if(mysqli_num_rows($result)==1){
-        $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
-        $param_oldPassword = $row["Password"];
-        $param_roleName = $row["RoleName"];
-    }
-}
-else{
-    $param_id = $_SESSION["Id"];
-    $result = mysqli_query($mysqli,"SELECT Password,r.Name as RoleName FROM USERS INNER JOIN Roles AS R ON RoleId = R.Id WHERE Id='$param_id'");
-    if(mysqli_num_rows($result)==1){
-        $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
-        $param_oldPassword = $row["Password"];
-        $param_roleName = $row["RoleName"];
-    }
-}
-if($_SERVER["REQUEST_METHOD"] == "POST"){
-    if(empty(trim($_POST["oldPassword"]))){
-        $oldPassword_error = "You must enter your old password.";
-    } else{
-        $oldPassword = trim($_POST["oldPassword"]);
-    }
-    if(empty(trim($_POST["newPassword"]))){
-        $newPassword_error = "You must enter your new password.";
-    }
-    else if(strlen(trim($_POST["newPassword"]))<8){
-        $newPassword_error = "Your password must contain at least 8 characters.";
-    }
-    else{
-        $newPassword = trim($_POST["newPassword"]);
-    }
-    if(empty(trim($_POST["confirmNewPassword"]))){
-        $confirmNewPassword_error = "You must confirm your new password.";
-    }
-    else if(strcmp($_POST["confirmNewPassword"],$_POST["newPassword"]) != 0){
-        $confirmPassword_error = "Your new password and confirm password do not match.";
-    }
-    else{
-        $confirmNewPassword = trim($_POST["confirmNewPassword"]);
-    }
-    if(empty($newPassword_error) && empty($confirmNewPassword_error) && empty($oldPassword_error)){
-        $result = mysqli_query($mysqli,"SELECT Password FROM Users Where Id ='$param_id'");
-        if(mysqli_num_rows($result)==1){
-            $hash_password = $row["Password"];
-            $oldPassword = hash("sha512",$oldPassword);
-            if(password_verify($oldPassword,$hash_password)){
-                $param_password = hash('sha512', $_POST["newPassword"]);
-                $param_password = password_hash($param_password, PASSWORD_DEFAULT);
-                $updatePassword = "UPDATE users SET Password = '$param_password' WHERE Id = '$param_id'";
-                if (mysqli_query($mysqli, $updatePassword)) {
-                    $updateConfirmPassword = "UPDATE users SET ConfirmPassword = '$param_password' WHERE Id = '$param_id'";
-                    if(mysqli_query($mysqli,$updateConfirmPassword)){
-                        //modal
-                    }
-                    else{
-                        header("location: error.php");
-                    }
-                }
-                else{
-                    header("location: error.php");
-                }
-            }
-            else{
-                $oldPassword_error="This password does not match your current password.";
-            }
-        }
-        mysqli_stmt_close($stmt);
-    }
-    header("location: userProfile.php?id="+$param_id);
-}
-mysqli_close($mysqli); ?>
-
-
+$param_id = $_SESSION["Id"];
+$param_role = $_SESSION["Role"];
+?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -314,6 +240,7 @@ mysqli_close($mysqli); ?>
             top: -24%;
         }
 
+
         #returnHome {
             color: rgb(146 199 255);
         }
@@ -343,6 +270,44 @@ mysqli_close($mysqli); ?>
                 left: 3%;
             }
         }
+        .table {
+            width: 100%;
+            max-width: 100%;
+            margin-bottom: 1rem;
+            background-color: transparent;
+        }
+
+        * {
+            outline: none;
+        }
+
+        .table th,
+        .table thead th {
+            font-weight: 500;
+        }
+
+        .table thead th {
+            vertical-align: bottom;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .table th {
+            padding: 1rem;
+            vertical-align: top;
+            border-top: 1px solid #dee2e6;
+        }
+
+        th {
+            text-align: inherit;
+        }
+
+        .m-b-20 {
+            margin-bottom: 20px;
+        }
+        .table-light tbody + tbody, .table-light td, .table-light th, .table-light thead th {
+            background-color: #e9ecef;
+            border-color: #dee2e6;
+        }
 <?php include 'CSS/authentication.css'; ?>
     </style>
 </head>
@@ -358,10 +323,10 @@ mysqli_close($mysqli); ?>
             <?php echo '<a href="userProfile.php?id='.$param_id.'">Profile</a>';?>
         </li>
         <li class="nav-item">
-            <?php echo '<a href="pastServices.php?id='.$param_id.'&role='.$param_roleName.'">Past Services</a>';?>
+            <?php echo '<a href="pastServices.php?id='.$param_id.'&role='.$param_role.'">Past Services</a>';?>
         </li>
         <li class="nav-item">
-            <?php echo '<a href="awaitingServices.php?id='.$param_id.'&role='.$param_roleName.'">Awaiting Services</a>';?>
+            <?php echo '<a href="awaitingServices.php?id='.$param_id.'&role='.$param_role.'">Awaiting Services</a>';?>
         </li>
         <li class="nav-item">
             <?php echo '<a href="yourReviews.php?id='.$param_id.'">Your reviews</a>';?>
@@ -375,44 +340,153 @@ mysqli_close($mysqli); ?>
         <img src="Images/circle_PNG62.png" id="blackCircle" />>
 
     </ul>
+
     <input type="checkbox" id="nav-trigger" class="nav-trigger" />
     <!--<label for="nav-trigger"></label>-->
 
     <div class="site-wrap">
-        <header class="user__header">
-            <img src="Images/logo2.png" height="150" />
-            <h1 class="user__title">These changes are permanent and cannot be reverted.</h1>
-        </header>
-        <input type="hidden" id="userId" value="<?php $param_id?>" />
-        <form class="form" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
+        <?php
+        include("layout.php");
+        session_start();
+        require_once "Request.php";
+        $requests = array();
+        // Check existence of id parameter before processing further
+        if(isset($_GET["id"]) && !empty(trim($_GET["id"]))){
+            // Include config file
+            require_once "configuration.php";
+            $param_id = trim($_GET["id"]);
+            $param_role = trim($_GET["role"]);
+            if($_GET["role"] == "User"){
+                $query = "select r.DriverId as DriverId,
+                u.FirstName as FirstName,
+                u.LastName as LastName,
+                r.RequestedById as RequestedById,
+                r.IsAccepted as IsAccepted,
+                r.IsSeen as IsSeen,
+                r.TimeOfRequest as TimeOfRequest,
+                du.FirstName as DriverFirstName,
+                du.LastName as DriverLastName,
+                du.UserName as DriverUserName,
+                u.UserName as CustomerUserName,
+                r.Address as Address,
+                r.Destination as Destination
+                from lynx.requests as r
+                inner join lynx.users as u on u.Id = r.RequestedById
+                inner join lynx.drivers as d on d.Id = r.DriverId
+                inner join lynx.users as du on d.UserId = du.Id
+                where r.timeofrequest > DATE_ADD(CURDATE(), INTERVAL 1 DAY) and r.RequestedById = ?";
+                if($stmt = mysqli_prepare($mysqli, $query)){
+                    mysqli_stmt_bind_param($stmt,"s",$param_id);
+                    if(mysqli_stmt_execute($stmt)){
+                        $result = mysqli_stmt_get_result($stmt);
+                        if(mysqli_num_rows($result)>0){
+                            foreach ($result as $r){
+                                $request = new Request();
+                                $request->set_driverId($r["DriverId"]);
+                                $request->set_firstName($r["FirstName"]);
+                                $request->set_lastName($r["LastName"]);
+                                $request->set_requestedById($r["RequestedById"]);
+                                $request->set_isAccepted($r["IsAccepted"]);
+                                $request->set_isSeen($r["IsSeen"]);
+                                $request->set_timeOfRequest($r["TimeOfRequest"]);
+                                $request->set_driverFullName($r["DriverFirstName"]." ".$r["DriverLastName"]);
+                                $request->set_driverUserName($r["DriverUserName"]);
+                                $request->set_customerFullName($r["FirstName"]." ".$r["LastName"]);
+                                $request->set_customerUserName($r["CustomerUserName"]);
+                                $request->set_address($r["Address"]);
+                                $request->set_destination($r["Destination"]);
+                                array_push($requests,$request);
+                            }
+                            echo "<div class='content'>";
+                            echo "<div class='container'>";
+                            echo "<table class='table table-light'>
+                        <thead class='thead-light'>
+                            <tr>                                <th scope='col'>Driver</th>
+                                <th scope='col'>Time of Service</th>
+                                <th scope='col'>Address</th>
+                                <th scope='col'>Destination</th>
+<th scope='col'>Accepted</th><th scope='col'>Seen</th scope='col'><th></th>
+</tr>
+                        </thead> <tbody class=''>";
+                        }
+                        else{
+                            echo "<h3 class='text-danger'>No data.</h3>";
+                        }
+                    }
+                }
 
-            <div class="form__group" <?php echo(!empty($oldPassword_error))? 'has-error' : '' ?>>
-                <input type="password" placeholder="Old Password" class="form__input" name="oldPassword" id="oldPassword" />
-                <span class="help-block text-danger">
-                    <?php echo $oldPassword_error ?>
-                </span>
-            </div>
+                mysqli_stmt_close($stmt);
+            }
+            else if ($_GET["role"] == "Driver"){
+                $query = "select * from lynx.requests as r
+                inner join lynx.users as u on u.Id = r.RequestedById
+                inner join lynx.users as d on d.Id = r.DriverId
+                where r.timeofrequest < DATE_ADD(CURDATE(), INTERVAL 1 DAY) and r.DriverId ='$param_id'";
+                if($stmt = mysqli_prepare($mysqli, $query)){
+                    mysqli_stmt_bind_param($stmt,"s",$id);
+                    if(mysqli_stmt_execute($stmt)){
+                        $result = mysqli_stmt_get_result($stmt);
+                        if(mysqli_num_rows($result)>0){
+                            foreach ($result as $r){
+                                $request = new Request();
+                                $request->set_driverId($r["DriverId"]);
+                                $request->set_firstName($r["FirstName"]);
+                                $request->set_lastName($r["LastName"]);
+                                $request->set_requestedById($r["RequestedById"]);
+                                $request->set_isAccepted($r["IsAccepted"]);
+                                $request->set_isSeen($r["IsSeen"]);
+                                $request->set_address($r["Address"]);
+                                $request->set_destination($r["Destination"]);
+                                $request->set_timeOfRequest($r["TimeOfRequest"]);
+                                array_push($requests,$request);
+                            }
+                            echo "<div class='content'>";
+                            echo "<div class='container'>";
+                            echo "<table class='table table-light'>
+                        <thead class='thead-light'>
+                            <tr>
+                                <th scope='col'>Driver Name</th>
+                                <th scope='col'>Time of Service</th>
+                                <th scope='col'>Address</th>
+                                <th scope='col'>Destination</th>
+<th scope='col'>Accepted</th><th scope='col'>Seen</th scope='col'><th></th>
+</tr>
+                        </thead> <tbody class=''>";
+                        }
+                        else{
+                            echo "<h3 class='text-danger'>No data.</h3>";
+                        }
 
-            <div class="form__group" <?php echo(!empty($newPassword_error))? 'has-error': ''?>>
-                <input type="password" placeholder="New Password" class="form__input" name="newPassword" id="newPassword" />
-                <span class="help-block text-danger">
-                    <?php echo $newPassword_error ?>
-                </span>
-            </div>
+                    }
+                }
+                mysqli_stmt_close($stmt);
+            }
+            mysqli_stmt_close($mysqli);
+        }
 
-            <div class="form__group" <?php echo(!empty($confirmNewPassword_error))? 'has-error': ''?>>
-                <input type="password" placeholder="Confirm New Password" class="form__input" name="confirmNewPassword" id="confirmNewPassword" />
-                <span class="help-block text-danger">
-                    <?php echo $confirmNewPassword_error ?>
-                </span>
-            </div>
-            <button class="btn" type="submit">Confirm</button>
-        </form>
-        <button class="btn btn-info" id="myBtn" onclick="goBack()" style="width: 48%; margin-left: 25%; margin-top: 1%;">
-            Cancel
-        </button>
-        </div>
-    </body>
+        for($counter = 0; $counter<count($requests);$counter++){
+            echo"<tr>";
+            echo"<td scope='col'>".$requests[$counter]->get_driverFullName()."</td>";
+            echo"<td scope='col'>".$requests[$counter]->get_timeOfRequest()."</td>";
+            echo"<td scope='col'>".$requests[$counter]->get_address()."</td>";
+            echo"<td scope='col'>".$requests[$counter]->get_destination()."</td>";
+            echo"<td scope='col'>".$requests[$counter]->get_isAccepted()."</td>";
+            echo"<td scope='col'>".$requests[$counter]->get_isSeen()."</td>";
+echo"<th scope = 'col'><button class='btn btn-danger'>Driver details</button></th>";
+            echo"</tr>";
+        }
+        //echo"
+        //<tr>
+        //<td>".$requests[$counter]->get_
+
+        //</div>
+        //</div>";
+
+        ?>
+
+    </div>
+
+</body>
 </html>
 <script>
     debugger
@@ -420,3 +494,4 @@ mysqli_close($mysqli); ?>
         window.history.back();
     }
 </script>
+

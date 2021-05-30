@@ -266,7 +266,6 @@ else if($counter%3==0){
         <h4>".$drivers[$counter]->get_firstName()." ".$drivers[$counter]->get_lastName()."</h4>
         <p class='text-muted'>".$drivers[$counter]->get_age()."<span>| </span><span>".$drivers[$counter]->get_gender()."</span><span>| </span><span>".$drivers[$counter]->get_area()."</span></p>
     </div>
-    <button type='button' class='btn btn-dark mt-3 btn-rounded waves-effect w-md waves-light'>Show details</button>
     <br/><button type='button' class='btn btn-golden mt-3 btn-rounded waves-effect w-md waves-light' onclick='location.href=\"requireService.php?id=".$param_id."&driverId=".$drivers[$counter]->get_id()."\";'>Require service</button>
     <div class='mt-4'>
         <div class='row'>

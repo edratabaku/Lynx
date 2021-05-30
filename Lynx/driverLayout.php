@@ -275,6 +275,9 @@ if(isset($_SESSION["Role"]) && $_SESSION["Role"] == "Driver"){
         <li class="nav-item">
             <a href="#">New requests</a>
         </li>
+        <li class="nav-item">
+            <?php echo '<a href="logout.php">Sign Out</a>';?>
+        </li>
     </ul>
 
     <input type="checkbox" id="nav-trigger" class="nav-trigger" />
