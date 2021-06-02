@@ -1,78 +1,35 @@
+
 <?php
-include("layout.php");
 session_start();
-$param_roleName=$_SESSION["Role"];
-// Check existence of id parameter before processing further
+$param_id = $_SESSION["Id"];
+$param_role = $_SESSION["Role"];
 if(isset($_GET["id"]) && !empty(trim($_GET["id"]))){
     // Include config file
     require_once "configuration.php";
     $param_id = trim($_GET["id"]);
-    $result = mysqli_query($mysqli,"SELECT * FROM Users WHERE Id='$param_id'");
+    $result = mysqli_query($mysqli,"SELECT d.Id as Id,
+                                            d.UserId as UserId, 
+                                            d.LicenseId as LicenseId, 
+                                            d.OperatingArea as Area,
+                                            d.Car as Car, 
+                                            u.FirstName as FirstName, 
+                                            u.LastName as LastName, 
+                                            u.Gender as Gender FROM Drivers as d inner join Users as u on d.UserId = u.Id WHERE d.Id='$param_id'");
      if(mysqli_num_rows($result) == 1){
          $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
          $Id = $row["Id"];
-                     $username = $row["Username"];
-                     $email = $row["Email"];
-                     $phoneNumber = $row["PhoneNumber"];
-                     $firstName = $row["FirstName"];
-                     $lastName = $row["LastName"];
-                     $isActive= $row["IsActive"];
-                     $isBanned = $row["IsBanned"];
-                     $dateOfBirth = $row["DateOfBirth"];
-                     $gender = $row["Gender"];
+         $userId = $row["UserId"];
+         $licenseId = $row["LicenseId"];
+         $operatingArea = $row["Area"];
+         $car = $row["Car"];
+         $firstName = $row["FirstName"];
+         $lastName = $row["LastName"];
+         $gender = $row["Gender"];
      }
      else{exit();}
-
-    if ($_SESSION["Role"]=="Driver"){
-        // Prepare a select statement
-        $sql = "SELECT Id, UserId, LicenseId, LicenseDate, LicenseExpireDate, OperatingArea, Car, IsApproved, IsBusy from Drivers WHERE UserId=?";
-
-        if($stmt = mysqli_prepare($mysqli, $sql)){
-            // Bind variables to the prepared statement as parameters
-            mysqli_stmt_bind_param($stmt, "i", $param_id);
-
-            // Set parameters
-            $param_id = trim($_GET["id"]);
-
-            // Attempt to execute the prepared statement
-            if(mysqli_stmt_execute($stmt)){
-                $result = mysqli_stmt_get_result($stmt);
-
-                if(mysqli_num_rows($result) == 1){
-                    /* Fetch result row as an associative array. Since the result set
-                    contains only one row, we don't need to use while loop */
-                    $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
-
-                    // Retrieve individual field value
-                    $driverId = $row["Id"];
-                    $userId = $row["UserId"];
-                    $licenseId = $row["LicenseId"];
-                    $licenseDate = $row["LicenseDate"];
-                    $licenseExpireDate = $row["LicenseExpireDate"];
-                    $operatingArea = $row["OperatingArea"];
-                    $car = $row["Car"];
-                    $isApproved = $row["IsApproved"];
-                    $isBusy = $row["IsBusy"];
-
-                } else{
-                    // URL doesn't contain valid id parameter. Redirect to error page
-                    header("location: error.php");
-                    exit();
-                }
-
-            } else{
-                echo "Oops! Something went wrong. Please try again later.";
-            }
-        }
-
-    }
     mysqli_stmt_close($stmt);
     // Close connection
     mysqli_close($mysqli);
-} else{
-    // URL doesn't contain id parameter. Redirect to error page
-    header("location: error.php");
-    exit();
 }
 ?>
 
@@ -81,19 +38,7 @@ if(isset($_GET["id"]) && !empty(trim($_GET["id"]))){
 <head>
     <meta charset="UTF-8" />
     <title>View Record</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Varela+Round" />
-    
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
-    
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
-   
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
-    
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
     <style>
         body {
             background: #333333;
@@ -324,6 +269,7 @@ if(isset($_GET["id"]) && !empty(trim($_GET["id"]))){
             top: -24%;
         }
 
+
         #returnHome {
             color: rgb(146 199 255);
         }
@@ -353,10 +299,49 @@ if(isset($_GET["id"]) && !empty(trim($_GET["id"]))){
                 left: 3%;
             }
         }
+        .table {
+            width: 100%;
+            max-width: 100%;
+            margin-bottom: 1rem;
+            background-color: transparent;
+        }
 
+        * {
+            outline: none;
+        }
+
+        .table th,
+        .table thead th {
+            font-weight: 500;
+        }
+
+        .table thead th {
+            vertical-align: bottom;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .table th {
+            padding: 1rem;
+            vertical-align: top;
+            border-top: 1px solid #dee2e6;
+        }
+
+        th {
+            text-align: inherit;
+        }
+
+        .m-b-20 {
+            margin-bottom: 20px;
+        }
+        .table-light tbody + tbody, .table-light td, .table-light th, .table-light thead th {
+            background-color: #e9ecef;
+            border-color: #dee2e6;
+        }
+<?php include 'CSS/authentication.css'; ?>
     </style>
 </head>
- <ul class="navigation">
+<body>
+    <ul class="navigation">
         <li class="item">
             <img src="Images/logo2.png" height="150" />
         </li>
@@ -367,10 +352,10 @@ if(isset($_GET["id"]) && !empty(trim($_GET["id"]))){
             <?php echo '<a href="userProfile.php?id='.$param_id.'">Profile</a>';?>
         </li>
         <li class="nav-item">
-            <?php echo '<a href="pastServices.php?id='.$param_id.'&role='.$param_roleName.'">Past Services</a>';?>
+            <?php echo '<a href="pastServices.php?id='.$param_id.'&role='.$param_role.'">Past Services</a>';?>
         </li>
         <li class="nav-item">
-            <?php echo '<a href="awaitingServices.php?id='.$param_id.'&role='.$param_roleName.'">Awaiting Services</a>';?>
+            <?php echo '<a href="awaitingServices.php?id='.$param_id.'&role='.$param_role.'">Awaiting Services</a>';?>
         </li>
         <li class="nav-item">
             <?php echo '<a href="yourReviews.php?id='.$param_id.'">Your reviews</a>';?>
@@ -378,114 +363,24 @@ if(isset($_GET["id"]) && !empty(trim($_GET["id"]))){
         <li class="nav-item">
             <?php echo '<a href="yourComplaints.php?id='.$param_id.'">Your complaints</a>';?>
         </li>
-      <li class="nav-item">
+        <li class="nav-item">
             <?php echo '<a href="logout.php">Sign Out</a>';?>
         </li>
         <img src="Images/circle_PNG62.png" id="blackCircle" />>
 
     </ul>
+
     <input type="checkbox" id="nav-trigger" class="nav-trigger" />
     <!--<label for="nav-trigger"></label>-->
 
     <div class="site-wrap">
-        <div class="row">
-            <div class="col-md-8">
-            <div class="row">
-                <div class="col-md-12 mb-5" style="padding-left:0px">
-                    <h1 class="mt-1 mb-3" id="title">
-                        <?php echo $row["FirstName"]?>
-                        <?php echo $row["LastName"]; ?>
-                    </h1>
-                </div>
-            </div>
-                <div class="row">
-                    <div class="col-md-8">
-                    <div class="form-group row">
-                        <label>Username: &nbsp;</label>
-                        <?php echo $row["Username"]; ?> 
-                    </div> 
-                    <div class="form-group row">
-                        <label>Email: &nbsp;</label>
-                        <?php echo $row["Email"]; ?>
-                    </div>
-                    </div>
-                    <div class="col-md-4">
-
-                    </div>
-
-                </div>
-
-            </div>
-            <div class="col-md-4">
-        <div>
-            <?php if($row['profileImage']==null){?>
-                <img src="Images/avatar.png" id="profilePic" alt=""/>
-
-            <?php } else{?>
-            <img src="<?php echo 'images/' . $row['profileImage'] ?>" id="profilePic" alt="" /><?php } ?>
-            <img src="Images/wcgoldbg.png" id="watercolor"/>
-        </div>
-            </div>
-        </div>
-        <div class="row">
-            <?php echo '<a href="editProfile.php?id='.$Id.'" class="btn btn-info" style="font-size:16px;background-image: linear-gradient(45deg, #d89000, #553f00c9);">Edit Profile</a>'; ?>
-            <?php echo '<a href="editPassword.php?id='.$Id.'" class="btn btn-info" style="font-size:16px;">Change Password</a>'; ?>
-            <?php echo '<a href="#deleteEmployeeModal" class="delete btn btn-info" data-id="'.$Id.'" data-toggle="modal">
-                Deactivate Account
-            </a>'; ?>
-            <?php echo '<input type="hidden" value="'.$Id.'" id="hiddenId">';?>
-       </div>
-        <!--<div class="row mt-3">
-            <a href="home.php" id="returnHome" style="font-size:16px;">Return to main page</a>
-        </div>-->
-        </div>
-    <!-- Delete Modal HTML -->
-    <div id="deleteEmployeeModal" class="modal fade">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <form>
-                    <div class="modal-header">
-                        <h4 class="modal-title">Deactivate Account </h4>
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                    </div>
-                    <div class="modal-body">
-                        <input type="hidden" id="id_d" name="id" class="form-control" />
-                        <p>Are you sure you want to deactivate your account?</p>
-                        <p class="text-warning">
-                            <small>This action is permanent and cannot be undone.</small>
-                        </p>
-                    </div>
-                    <div class="modal-footer">
-                        <input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel" />
-                        <button type="button" class="btn btn-danger" id="delete">Delete</button>
-                    </div>
-                </form>
-            </div>
-        </div>
+<div class="card text-white bg-dark mb-3" >
+    <div class="card-header text-center"><?php echo $firstName." ".$lastName ?></div>
+    <div class="card-body">
+        <h5 class="card-title">Dark card title</h5>
+        <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
     </div>
-
-
+</div>
+</div>
 </body>
 </html>
-<script type="text/javascript">
-    $(document).on("click", ".delete", function() {
-        var id=$(this).attr("data-id");
-        $('#id_d').val(id);
-    });
-    $(document).on("click", "#delete", function() {
-        $.ajax({
-        url: "deleteAccount.php",
-        type: "POST",
-        cache: false,
-        data:{
-            type:3,
-            id: $("#id_d").val()
-        },
-        success: function(dataResult){
-            //location.reload();
-            $('#deleteEmployeeModal').modal('hide');
-            window.location.href = 'sorryToSeeYouGo.php';
-        }
-    });
-    });
-</script>

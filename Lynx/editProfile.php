@@ -1,4 +1,7 @@
 <?php
+session_start();
+$userId = $_SESSION["Id"];
+$userRole = $_SESSION["Role"];
 include("layout.php");
 // Include config file
 require_once "configuration.php";
@@ -416,7 +419,7 @@ if(isset($_POST["id"]) && !empty($_POST["id"])){
             margin-top: 20px;
             font-family: "system-ui" !important;
             font-weight: 600;
-            overflow-x:hidden;
+            /*overflow-x:hidden;*/
         }
 
         .card-box {
@@ -698,19 +701,19 @@ if(isset($_POST["id"]) && !empty($_POST["id"])){
             <a href="userLayout.php?page=index">Home</a>
         </li>
         <li class="nav-item">
-            <?php echo '<a href="userProfile.php?id='. $param_id.'">Profile</a>';?>
+            <?php echo '<a href="userProfile.php?id='. $userId.'">Profile</a>';?>
         </li>
         <li class="nav-item">
-            <?php echo '<a href="pastServices.php?id='. $param_id.'&role='.$roleName.'">Past Services</a>';?>
+            <?php echo '<a href="pastServices.php?id='. $userId.'&role='.$userRole.'">Past Services</a>';?>
         </li>
         <li class="nav-item">
-            <?php echo '<a href="awaitingServices.php?id='. $param_id.'&role='.$roleName.'">Awaiting Services</a>';?>
+            <?php echo '<a href="awaitingServices.php?id='. $userId.'&role='.$userRole.'">Awaiting Services</a>';?>
         </li>
         <li class="nav-item">
-            <?php echo '<a href="yourReviews.php?id='. $param_id.'">Your reviews</a>';?>
+            <?php echo '<a href="yourReviews.php?id='. $userId.'">Your reviews</a>';?>
         </li>
         <li class="nav-item">
-            <?php echo '<a href="yourComplaints.php?id='. $param_id.'">Your complaints</a>';?>
+            <?php echo '<a href="yourComplaints.php?id='. $userId.'">Your complaints</a>';?>
         </li>
         <li class="nav-item">
             <?php echo '<a href="logout.php">Sign Out</a>';?>

@@ -36,6 +36,7 @@
     <Compile Include="Driver.php" />
     <Compile Include="driverIndex.php" />
     <Compile Include="driverLayout.php" />
+    <Compile Include="driverReviews.php" />
     <Compile Include="editPassword.php" />
     <Compile Include="editProfile.php" />
     <Compile Include="filterRequests.php" />

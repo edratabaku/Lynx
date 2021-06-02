@@ -1,5 +1,4 @@
 ﻿$('#complaintForm').on('submit', function (event) {
-    debugger;
     event.preventDefault();
     var formData = $(this).serialize();
     var formId = $("#testId").val();

@@ -4,7 +4,7 @@ require_once "configuration.php";
 $oldPassword_error=$newPassword_error=$confirmNewPassword_error="";
 if(isset($_GET["id"])&& !empty(trim($_GET["id"]))){
     $param_id = trim($_GET["id"]);
-    $result = mysqli_query($mysqli,"SELECT Password,r.Name as RoleName FROM USERS INNER JOIN Roles AS R ON RoleId = R.Id WHERE Id='$param_id'");
+    $result = mysqli_query($mysqli,"SELECT Password,r.Name as RoleName FROM USERS as u INNER JOIN Roles AS R ON RoleId = R.Id WHERE u.Id='$param_id'");
     if(mysqli_num_rows($result)==1){
         $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
         $param_oldPassword = $row["Password"];
@@ -13,7 +13,7 @@ if(isset($_GET["id"])&& !empty(trim($_GET["id"]))){
 }
 else{
     $param_id = $_SESSION["Id"];
-    $result = mysqli_query($mysqli,"SELECT Password,r.Name as RoleName FROM USERS INNER JOIN Roles AS R ON RoleId = R.Id WHERE Id='$param_id'");
+    $result = mysqli_query($mysqli,"SELECT Password,r.Name as RoleName FROM USERS as u INNER JOIN Roles AS R ON RoleId = R.Id WHERE u.Id='$param_id'");
     if(mysqli_num_rows($result)==1){
         $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
         $param_oldPassword = $row["Password"];
