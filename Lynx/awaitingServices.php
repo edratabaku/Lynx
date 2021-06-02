@@ -472,7 +472,7 @@ $param_role = $_SESSION["Role"];
             echo"<td scope='col'>".$requests[$counter]->get_destination()."</td>";
             echo"<td scope='col'>".$requests[$counter]->get_isAccepted()."</td>";
             echo"<td scope='col'>".$requests[$counter]->get_isSeen()."</td>";
-echo"<th scope = 'col'><button class='btn btn-danger'>Driver details</button></th>";
+            echo"<th scope='col'><a class='btn btn-danger' href='driverReviews.php?id=".$requests[$counter]->get_driverId()."'>Driver details</a></th>";
             echo"</tr>";
         }
         //echo"

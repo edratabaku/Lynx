@@ -1,4 +1,3 @@
-
 <?php
 session_start();
 $param_id = $_SESSION["Id"];
@@ -24,7 +23,7 @@ if(isset($_GET["id"]) && !empty(trim($_GET["id"]))){
          $car = $row["Car"];
          $firstName = $row["FirstName"];
          $lastName = $row["LastName"];
-         $gender = $row["Gender"];
+         $gender = $row["Gender"] == "m"? "Male" : ($row["Gender"] == "f"? "Female" : "Other");
      }
      else{exit();}
     mysqli_stmt_close($stmt);
@@ -377,10 +376,107 @@ if(isset($_GET["id"]) && !empty(trim($_GET["id"]))){
 <div class="card text-white bg-dark mb-3" >
     <div class="card-header text-center"><?php echo $firstName." ".$lastName ?></div>
     <div class="card-body">
-        <h5 class="card-title">Dark card title</h5>
-        <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+        <div class="row">
+            <div class="col-md-4">
+                <h5 class="card-title">
+                    <img src="Images/avatar.png" width="100" />
+                </h5>
+            </div>
+            <div class="col-md-4">
+                <p class="card-text">
+                   <b>Full name:</b>  <?php echo $firstName." ".$lastName?>
+                </p>
+
+                <p class="card-text">
+                    <b>Gender:</b> <?php echo $gender."" ?>
+                </p>
+            </div>
+            <div class="col-md-4">
+                <p class="card-text">
+                    <b>License:</b> <?php echo $licenseId."" ?>
+                </p>
+                <p class="card-text">
+                    <b>Operating area:</b> <?php echo $operatingArea."" ?>
+                </p>
+                <p class="card-text">
+                    <b>Car description:</b> <?php echo $car."" ?>
+                </p>
+            </div>
+        </div>
     </div>
 </div>
+        <?php
+$reviews = array();
+$query="";
+if($name == null){
+    $query = "select r.Id,
+                    r.DriverId as DriverId,
+                    du.FirstNAme as DriverFirstName,
+                    du.LastNAme as DriverLastName,
+                    r.CustomerId as CustomerId,
+                    r.Rating as Rating,
+                    r.Text as Text
+                    from lynx.Reviews as r
+                    inner join lynx.Drivers as d on r.DriverId = d.Id
+                    inner join lynx.Users as du on d.UserId = du.Id
+                    where DriverId = '$id' and r.IsActive = 1 ";
+    if($stmt = mysqli_prepare($mysqli, $query)){
+        if(mysqli_stmt_execute($stmt)){
+            $result = mysqli_stmt_get_result($stmt);
+            if(mysqli_num_rows($result)>0){
+                foreach ($result as $r){
+                    $review = new Review();
+                    $review->set_id($r["Id"]);
+                    $review->set_driverId($r["DriverId"]);
+                    $review->set_customerId($r["CustomerId"]);
+                    $driverName = $r["DriverFirstName"]." ".$r["DriverLastName"];
+                    $review->set_driverName($driverName);
+                    $review->set_rating($r["Rating"]);
+                    $review->set_text($r["Text"]);
+                    array_push($reviews,$review);
+                }
+            }
+        }
+    }
+    mysqli_stmt_close($stmt);
+    for($counter = 0; $counter<count($reviews);$counter++){
+        echo "<div class=\"card text-white bg-dark mb-3\" >";
+        echo "<div class=\"card-body\">";
+        echo "<h5 class=\"card-title\">";
+    }
+    
+    <div class="card-header text-center"><?php echo $firstName." ".$lastName ?></div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-4">
+                <h5 class="card-title">
+                    <img src="Images/avatar.png" width="100" />
+                </h5>
+            </div>
+            <div class="col-md-4">
+                <p class="card-text">
+                   <b>Full name:</b>  <?php echo $firstName." ".$lastName?>
+                </p>
+
+                <p class="card-text">
+                    <b>Gender:</b> <?php echo $gender."" ?>
+                </p>
+            </div>
+            <div class="col-md-4">
+                <p class="card-text">
+                    <b>License:</b> <?php echo $licenseId."" ?>
+                </p>
+                <p class="card-text">
+                    <b>Operating area:</b> <?php echo $operatingArea."" ?>
+                </p>
+                <p class="card-text">
+                    <b>Car description:</b> <?php echo $car."" ?>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+        ?>
 </div>
 </body>
 </html>

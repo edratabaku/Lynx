@@ -9,7 +9,7 @@
     <OutputType>Library</OutputType>
     <ProjectTypeGuids>{A0786B88-2ADB-4C21-ABE8-AA2D79766269}</ProjectTypeGuids>
     <RuntimeVersion>7.4.13.0</RuntimeVersion>
-    <SpecificPageValue>index.php</SpecificPageValue>
+    <SpecificPageValue>login.php</SpecificPageValue>
     <StartAction>SpecificPage</StartAction>
     <Runtime>PHP</Runtime>
   </PropertyGroup>
