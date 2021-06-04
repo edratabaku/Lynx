@@ -8,7 +8,7 @@ if($_SERVER["REQUEST_METHOD"]=="GET"){
     }
     else{
         $param_userid = $_SESSION["Id"];
-       
+
     }
     $_SESSION["complaintWriterId"] = $param_userid;
     if(isset($_GET["subjectId"]) && !empty(trim($_GET["subjectId"]))){
@@ -36,7 +36,7 @@ if($_SERVER["REQUEST_METHOD"]=="POST"){
         $param_id = uniqid();
         $result = mysqli_query($mysqli,"INSERT INTO Complaints(Id, WriterId, SubjectId, Text, IsActive) values ('$param_id','$param_writer','$param_subject','$text',1);");
         if($result){
-            //
+            header("location:yourComplaints.php?id=".$param_writer);
         }
         else{
             header("location: error.php");

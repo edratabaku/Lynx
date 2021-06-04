@@ -26,6 +26,7 @@
     <Compile Include="Administration\adminConfig.php" />
     <Compile Include="Administration\adminlayout.php" />
     <Compile Include="Administration\roles.php" />
+    <Compile Include="adminLayout.php" />
     <Compile Include="awaitingServices.php" />
     <Compile Include="changeFormType.php" />
     <Compile Include="Comment.php" />
@@ -33,10 +34,12 @@
     <Compile Include="complaintForm.php" />
     <Compile Include="configuration.php" />
     <Compile Include="deleteAccount.php" />
+    <Compile Include="deleteComplaint.php" />
     <Compile Include="Driver.php" />
     <Compile Include="driverIndex.php" />
     <Compile Include="driverLayout.php" />
     <Compile Include="driverReviews.php" />
+    <Compile Include="editComlaint.php" />
     <Compile Include="editPassword.php" />
     <Compile Include="editProfile.php" />
     <Compile Include="filterRequests.php" />

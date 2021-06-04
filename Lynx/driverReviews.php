@@ -27,8 +27,8 @@ if(isset($_GET["id"]) && !empty(trim($_GET["id"]))){
      }
      else{exit();}
     mysqli_stmt_close($stmt);
-    // Close connection
-    mysqli_close($mysqli);
+    //// Close connection
+    //mysqli_close($mysqli);
 }
 ?>
 
@@ -38,6 +38,10 @@ if(isset($_GET["id"]) && !empty(trim($_GET["id"]))){
     <meta charset="UTF-8" />
     <title>View Record</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+    <link rel="stylesheet" href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css' />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
     <style>
         body {
             background: #333333;
@@ -408,18 +412,20 @@ if(isset($_GET["id"]) && !empty(trim($_GET["id"]))){
         <?php
 $reviews = array();
 $query="";
+$name = "";
+require_once "Review.php";
 if($name == null){
     $query = "select r.Id,
                     r.DriverId as DriverId,
-                    du.FirstNAme as DriverFirstName,
-                    du.LastNAme as DriverLastName,
+                    du.FirstName as DriverFirstName,
+                    du.LastName as DriverLastName,
                     r.CustomerId as CustomerId,
                     r.Rating as Rating,
                     r.Text as Text
                     from lynx.Reviews as r
                     inner join lynx.Drivers as d on r.DriverId = d.Id
                     inner join lynx.Users as du on d.UserId = du.Id
-                    where DriverId = '$id' and r.IsActive = 1 ";
+                    where DriverId = '$param_id' and r.IsActive = 1 ";
     if($stmt = mysqli_prepare($mysqli, $query)){
         if(mysqli_stmt_execute($stmt)){
             $result = mysqli_stmt_get_result($stmt);
@@ -441,42 +447,21 @@ if($name == null){
     mysqli_stmt_close($stmt);
     for($counter = 0; $counter<count($reviews);$counter++){
         echo "<div class=\"card text-white bg-dark mb-3\" >";
-        echo "<div class=\"card-body\">";
-        echo "<h5 class=\"card-title\">";
+            echo "<div class=\"card-body\">";
+                echo "<p class=\"card-text\">";
+                    echo "<div class='rating-css'><div class='star-icon'>";
+            for($count = 0; $count<$reviews[$counter]->get_rating();$count++){
+            echo"
+                 <label for='rating1' class='fa fa-star'></label>";}
+        echo" </div></div>";
+        echo $reviews[$counter]->get_text();
+        echo "</p>";
+        echo "</div>";
+        echo "</div>";
     }
-    
-    <div class="card-header text-center"><?php echo $firstName." ".$lastName ?></div>
-    <div class="card-body">
-        <div class="row">
-            <div class="col-md-4">
-                <h5 class="card-title">
-                    <img src="Images/avatar.png" width="100" />
-                </h5>
-            </div>
-            <div class="col-md-4">
-                <p class="card-text">
-                   <b>Full name:</b>  <?php echo $firstName." ".$lastName?>
-                </p>
-
-                <p class="card-text">
-                    <b>Gender:</b> <?php echo $gender."" ?>
-                </p>
-            </div>
-            <div class="col-md-4">
-                <p class="card-text">
-                    <b>License:</b> <?php echo $licenseId."" ?>
-                </p>
-                <p class="card-text">
-                    <b>Operating area:</b> <?php echo $operatingArea."" ?>
-                </p>
-                <p class="card-text">
-                    <b>Car description:</b> <?php echo $car."" ?>
-                </p>
-            </div>
-        </div>
-    </div>
-</div>
-        ?>
+    mysqli_close($mysqli);
+}
+        ?>     
 </div>
 </body>
 </html>

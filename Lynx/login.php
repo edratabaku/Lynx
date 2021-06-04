@@ -20,7 +20,7 @@ if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] == true){
         exit;
     }
     else if(isset($_SESSION["Role"]) && $_SESSION["Role"]=="Administrator"){
-        header("location: adminIndex.php");
+        header("location: adminLayout.php?page=index");
         exit;
     }
 }

@@ -1,16 +1,66 @@
 <?php
-session_start();
-$id = $_SESSION["Id"];
+require_once "configuration.php";
+$writer=$subject=$text=$param_userid=$param_driverid="";
+
+ if(isset($_GET["id"]) && !empty(trim($_GET["id"]))){
+        // Get URL parameter
+        $id =  trim($_GET["id"]);
+        // Set parameters
+        $param_id = $id;
+
+        // Prepare a select statement
+        $result = mysqli_query($mysqli,
+                   "select c.Id as Id,
+                    w.Id as WriterId,
+                    w.FirstName as WriterFirstName,
+                    w.LastName as WriterLastName,
+                    s.FirstName as SubjectFirstName,
+                    s.LastName as SubjectLastName,
+                    s.Id as SubjectId,
+                    c.Text as Text,
+                    c.IsActive as IsActive from complaints as c
+                    inner join Users as w on c.WriterId = w.Id
+                    inner join Users as s on c.SubjectId = s.Id
+                    where c.Id = '$param_id'");
+        if(mysqli_num_rows($result) == 1){
+            /* Fetch result row as an associative array. Since the result set
+            contains only one row, we don't need to use while loop */
+            $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
+            $writer = $row["WriterFirstName"]." ".$row["WriterLastName"];
+            $subject = $row["SubjectFirstName"]." ".$row["SubjectLastName"];
+            $text = $row["Text"];
+            $param_userid = $row["WriterId"];
+            $param_driverid = $row["SubjectId"];
+        }
+ }
+ else if($_SERVER["REQUEST_METHOD"]=="POST"){
+     if($_POST["currentid"]==null){
+         return;
+     }
+     if($_POST["currentid"]==""||$_POST["param_userid"]==""||$_POST["param_driverid"]==""){
+         header("location: error.php");
+     }
+     else{
+         $param_userid = $_POST["param_userid"];
+         $id= $_POST["currentid"];
+         $text=$_POST["text"];
+        $result =mysqli_query($mysqli,"update complaints set text = '$text' where Id='$id'");
+        if($result){
+            header("location:yourComplaints.php?id=".$param_userid."");
+        }
+        else{
+            echo"Couldn't save changes";
+        }
+     }
+ }
+ mysqli_close($mysqli);
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
     <title>View Record</title>
-    <link rel="stylesheet" href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css' />
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css" />
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
     <style>
         body {
             background: #333333;
@@ -178,7 +228,6 @@ $id = $_SESSION["Id"];
             padding: 4em 1rem 5rem 4rem;
             background-size: 200%;
             color: #ffffffb3;
-            overflow:auto;
         }
 
         /* Nav Trigger */
@@ -242,7 +291,6 @@ $id = $_SESSION["Id"];
             top: -24%;
         }
 
-
         #returnHome {
             color: rgb(146 199 255);
         }
@@ -272,76 +320,13 @@ $id = $_SESSION["Id"];
                 left: 3%;
             }
         }
-        .table {
-            width: 100%;
-            max-width: 100%;
-            margin-bottom: 1rem;
-            background-color: transparent;
-        }
 
-        * {
-            outline: none;
-        }
-
-        .table th,
-        .table thead th {
-            font-weight: 500;
-        }
-
-        .table thead th {
-            vertical-align: bottom;
-            border-bottom: 2px solid #dee2e6;
-        }
-
-        .table th {
-            padding: 1rem;
-            vertical-align: top;
-            border-top: 1px solid #dee2e6;
-        }
-
-        th {
-            text-align: inherit;
-        }
-
-        .m-b-20 {
-            margin-bottom: 20px;
-        }
-        .table-light tbody + tbody, .table-light td, .table-light th, .table-light thead th {
-            background-color: #e9ecef;
-            border-color: #dee2e6;
-        }
-        .rating-css {
-            width: 300px;
-        }
-
-            .rating-css div {
-                color: #ffe400;
-                font-size: 30px;
-                font-family: sans-serif;
-                font-weight: 800;
-                text-align: center;
-                text-transform: uppercase;
-            }
-
-            .rating-css input {
-                display: none;
-            }
-
-                .rating-css input + label {
-
-
-                }
-
-                .rating-css input:checked + label ~ label {
-                    color: #838383;
-                }
-
-            .rating-css label:active {
-                transform: scale(0.8);
-                transition: 0.3s ease;
-            }
 <?php include 'CSS/authentication.css'; ?>
     </style>
+    <link rel="stylesheet" href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css' />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
 </head>
 <body>
     <ul class="navigation">
@@ -352,19 +337,19 @@ $id = $_SESSION["Id"];
             <a href="userLayout.php?page=index">Home</a>
         </li>
         <li class="nav-item">
-            <?php echo '<a href="userProfile.php?id='.$id.'">Profile</a>';?>
+            <?php echo '<a href="userProfile.php?id='.$param_userid.'">Profile</a>';?>
         </li>
         <li class="nav-item">
-            <?php echo '<a href="pastServices.php?id='.$id.'&role=User">Past Services</a>';?>
+            <?php echo '<a href="pastServices.php?id='.$param_userid.'&role='. $param_userRole.'">Past Services</a>';?>
         </li>
         <li class="nav-item">
-            <?php echo '<a href="awaitingServices.php?id='.$id.'&role=User">Awaiting Services</a>';?>
+            <?php echo '<a href="awaitingServices.php?id='.$param_userid.'&role='. $param_userRole.'">Awaiting Services</a>';?>
         </li>
         <li class="nav-item">
-            <?php echo '<a href="yourReviews.php?id='.$id.'">Your reviews</a>';?>
+            <?php echo '<a href="yourReviews.php?id='.$param_userid.'">Your reviews</a>';?>
         </li>
         <li class="nav-item">
-            <?php echo '<a href="yourComplaints.php?id='.$id.'">Your complaints</a>';?>
+            <?php echo '<a href="yourComplaints.php?id='.$param_userid.'">Your complaints</a>';?>
         </li>
         <li class="nav-item">
             <?php echo '<a href="logout.php">Sign Out</a>';?>
@@ -377,149 +362,43 @@ $id = $_SESSION["Id"];
     <!--<label for="nav-trigger"></label>-->
 
     <div class="site-wrap">
-        <?php
- require_once "configuration.php";
-require_once "Complaint.php";
-$name = $_REQUEST["name"];
-$id = $_GET["id"];
-$complaints = array();
-$query="";
-if($name == null){
-    $query = "select c.Id as Id,
-                    w.Id as WriterId,
-                    w.FirstName as WriterFirstName,
-                    w.LastName as WriterLastName,
-                    s.FirstName as SubjectFirstName,
-                    s.LastName as SubjectLastName,
-                    s.Id as SubjectId,
-                    c.Text as Text,
-                    c.IsActive as IsActive from complaints as c
-                    inner join Users as w on c.WriterId = w.Id
-                    inner join Users as s on c.SubjectId = s.Id
-                    where c.IsActive = 1 and WriterId='$id'";
-    if($stmt = mysqli_prepare($mysqli, $query)){
-        if(mysqli_stmt_execute($stmt)){
-            $result = mysqli_stmt_get_result($stmt);
-            if(mysqli_num_rows($result)>0){
-                foreach ($result as $r){
-                    $complaint = new Complaint();
-                    $complaint->set_id($r["Id"]);
-                    $complaint->set_isActive($r["IsActive"]);
-                    $complaint->set_subjectId($r["SubjectId"]);
-                    $subjectName = $r["SubjectFirstName"]." ".$r["SubjectLastName"];
-                    $complaint->set_subjectName($subjectName);
-                    $complaint->set_text($r["Text"]);
-                    $complaint->set_writerId($r["WriterId"]);
-                    $writerName = $r["WriterFirstName"]." ".$r["WriterLastNAme"];
-                    $complaint->set_writerName($writerName);
-                    array_push($complaints,$complaint);
-                }
-            }
-        }
-    }
-    mysqli_stmt_close($stmt);
-}
-else {
-    $query = "select c.Id as Id,
-                    w.Id as WriterId,
-                    w.FirstName as WriterFirstName,
-                    w.LastName as WriterLastName,
-                    s.FirstName as SubjectFirstName,
-                    s.LastName as SubjectLastName,
-                    s.Id as SubjectId,
-                    c.Text as Text,
-                    c.IsActive as IsActive from complaints as c
-                    inner join Users as w on c.WriterId = w.Id
-                    inner join Users as s on c.SubjectId = s.Id
-                    where c.IsActive = 1 and WriterId='$id' and (SubjectFirstName='$name' OR SubjectLastName='$name')";
-    if($stmt = mysqli_prepare($mysqli, $query)){
-        if(mysqli_stmt_execute($stmt)){
-            $result = mysqli_stmt_get_result($stmt);
-            if(mysqli_num_rows($result)>0){
-                foreach ($result as $r){
-                    $complaint = new Complaint();
-                    $complaint->set_id($r["Id"]);
-                    $complaint->set_isActive($r["IsActive"]);
-                    $complaint->set_subjectId($r["SubjectId"]);
-                    $subjectName = $r["SubjectFirstName"]." ".$r["SubjectLastName"];
-                    $complaint->set_subjectName($subjectName);
-                    $complaint->set_text($r["Text"]);
-                    $complaint->set_writerId($r["WriterId"]);
-                    $writerName = $r["WriterFirstName"]." ".$r["WriterLastNAme"];
-                    $complaint->set_writerName($writerName);
-                    array_push($complaints,$complaint);
-                }
-            }
-        }
-    }
-    mysqli_stmt_close($stmt);
-}
-echo "<div class='content'>";
-echo "<div class='container'>";
-for($counter = 0; $counter<count($complaints);$counter++){
-    //echo"<div class='row'>";
-    if($counter==0){
-        echo "<div class='row'>";
-    }
-    else if($counter%3==0){
-        echo "</div>";
-        echo "<div class='row'>";
-    }
-
-    echo"
-<div class='col-lg-4 col-xl-4 col-md-4 col-sm-12'>
-    <div class='text-center card-box'>
-        <div class='member-card pt-2 pb-2'>
-            <div class='thumb-lg member-thumb mx-auto'>";
-    echo"
+        <header class="user__header">
+            <img src="Images/logo2.png" height="150" />
+        </header>
+        <form class="form" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="POST">
+            <input type="hidden" id="param_userid" name="param_userid" value="<?php echo $param_userid?>" />
+            <input type="hidden" id="param_driverid" name="param_driverid" value="<?php echo $param_driverid?>" />
+            <input type="hidden" id="currentid" name="currentid" value="<?php echo $id?>" />
+            <div class="form__group">
+                <label for="text" class="text-white" style="font-size:larger;">
+                    Your Complaint for <?php echo $subject ?>
+                </label>
+                <textarea class="form-control" rows="5" id="text" name="text" value="<?php echo $text?>"></textarea>
             </div>
-        <div>
-        <h4>".$complaints[$counter]->get_subjectName()."</h4>
+            <div class="form__group">
+                <button type="submit" class="btn btn-golden mb-2 mt-2" id="saveComplaint">Send Complaint</button>
+                <button type="button" class="btn btn-golden" id="cancelReview" onclick="goBack()">Cancel</button>
+            </div>
+        </form>
     </div>
-
-    <div class='mt-4'>
-        <div class='row'>
-            <div class='col-md-12'>".$complaints[$counter]->get_text()."
-</div>
+    <div class="modal fade" id="thankyouModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel">Success!</h4>
+                </div>
+                <div class="modal-body">
+                    <p>Your complaint was submitted successfully!</p>
+                </div>
+            </div>
         </div>
-<div class='row mt-4' style='margin-top:3%; !important'><a class='btn btn-warning' href='editComlaint.php?id=".$complaints[$counter]->get_id()."'>Edit</a>
-<a class='btn btn-warning' style='margin-top:3%; !important' href='deleteComplaint.php?id=".$complaints[$counter]->get_id()."'>Delete</a></div>
-   </div>
-</div>
-
-<div>
-
-
-
-
-
-
-
-</div>
-
-
-
-</div>
-</div>
-
-";
-    if ($counter == count($complaints)-1 && $counter%3!=0){
-        echo "</div>";
-    }
-}
-echo "</div>
-</div>
-";
-
-echo"
-<script>
-function redirectToEdit(id){
-window.location.href('editComlaint.php?id=' + id);
-}
-</script>
-";
-mysqli_stmt_close($mysqli);
-        ?>
     </div>
 </body>
 </html>
+<script>
+    debugger
+    function goBack() {
+        window.history.back();
+    }
+</script>
